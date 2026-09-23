@@ -56,8 +56,10 @@
 #'   and only the year-y policy varies across coalitions. The attribution at
 #'   step y is then the marginal impact of the year-y policy conditional on the
 #'   past and undiluted by the future, and \code{sequential_totals()} sums the
-#'   steps into each factor's total impact at every year. \code{"on"} (the
-#'   historical default) leaves a factor that is "on" in a coalition at its
+#'   steps into each factor's total impact at every year. This is the default,
+#'   and matches the published pediatric implementation (hiv_decomp
+#'   run_simmod_mean.R). \code{"on"} (the pre-2026-09 behaviour, kept for
+#'   reproducing old runs) leaves a factor that is "on" in a coalition at its
 #'   observed values for ALL years, including after y; its same-year
 #'   attribution equals \code{"off"}'s for any causal model, but its
 #'   \code{extended_decomp} rows (year > decomp year) include future policies
@@ -93,7 +95,7 @@ decompose <- function(model,
                       step_scenarios = TRUE,
                       verbose        = TRUE,
                       n_cores        = 1L,
-                      future_policies = c("on", "off"),
+                      future_policies = c("off", "on"),
                       ...) {
 
   # ---- Validate inputs ----
