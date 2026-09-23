@@ -48,6 +48,20 @@
 #' @param step_scenarios Logical, whether to compute step scenarios (all-on
 #'   time series per decomp year). Default TRUE.
 #' @param verbose        Logical, print progress messages. Default TRUE.
+#' @param future_policies Character, what every factor does AFTER the decomp
+#'   year in each coalition run. \code{"off"} is sequential Shapley as specified
+#'   (Carter, "Estimating the impact of public health policies ... with Shapley
+#'   value decomposition", Algorithm 1): at step y all policies before y are at
+#'   their observed values, all policies after y are at their counterfactual,
+#'   and only the year-y policy varies across coalitions. The attribution at
+#'   step y is then the marginal impact of the year-y policy conditional on the
+#'   past and undiluted by the future, and \code{sequential_totals()} sums the
+#'   steps into each factor's total impact at every year. \code{"on"} (the
+#'   historical default) leaves a factor that is "on" in a coalition at its
+#'   observed values for ALL years, including after y; its same-year
+#'   attribution equals \code{"off"}'s for any causal model, but its
+#'   \code{extended_decomp} rows (year > decomp year) include future policies
+#'   and must not be summed across steps.
 #' @param n_cores        Integer, number of cores for parallel counterfactual
 #'   simulation runs. Default 1 (sequential). Values > 1 use
 #'   \code{parallel::mclapply()} (Unix/Mac only).
@@ -79,6 +93,7 @@ decompose <- function(model,
                       step_scenarios = TRUE,
                       verbose        = TRUE,
                       n_cores        = 1L,
+                      future_policies = c("on", "off"),
                       ...) {
 
   # ---- Validate inputs ----
@@ -87,6 +102,7 @@ decompose <- function(model,
   stopifnot(is.numeric(decomp_years), length(decomp_years) > 0)
   stopifnot(cf_type %in% c(CF_CHANGE_SINCE, CF_TOTAL_IMPACT))
   method <- normalize_decomp_method(method)
+  future_policies <- match.arg(future_policies)
 
   decomp_years <- sort(as.integer(decomp_years))
   n_cores <- as.integer(max(n_cores, 1L))
@@ -97,7 +113,8 @@ decompose <- function(model,
     summary_vars  = summary_vars,
     decomp_method = method,
     cf_type       = cf_type,
-    baseline_year = baseline_year
+    baseline_year = baseline_year,
+    future_policies = future_policies
   )
 
   # ---- Generate run table ----
@@ -146,13 +163,25 @@ decompose <- function(model,
     run_one_cf <- function(run_id) {
       run_spec <- unlist(as.list(run_table[run_id, factors, with = FALSE]))
 
-      # All-on case: use the pre-computed full simulation
-      if (all(run_spec == 1) && !is.null(full_summary)) {
+      # All-on case: use the pre-computed full simulation. Under
+      # future_policies = "off" all-on still has every policy off after y, so
+      # it is not the realised run and must be simulated.
+      if (all(run_spec == 1) && !is.null(full_summary) &&
+          future_policies == "on") {
         return(list(summary = full_summary[year %in% output_years]))
       }
 
       # Build counterfactual parameters
       params_cf <- params
+      if (future_policies == "off") {
+        # Every factor to its counterfactual from y + 1: the future is off in
+        # every coalition, so only the year-y policy varies below.
+        for (fname in factors) {
+          params_cf <- build_counterfactual(
+            model, params_cf, fname, y + 1L, cf_type, baseline_values, ...
+          )
+        }
+      }
       for (fname in names(run_spec[run_spec == 0])) {
         params_cf <- build_counterfactual(
           model, params_cf, fname, y, cf_type, baseline_values, ...
@@ -237,4 +266,35 @@ decompose <- function(model,
 
   if (verbose) message("Decomposition complete.")
   return(result)
+}
+
+
+#' Total impact per factor at every year from a sequential decomposition
+#'
+#' Sums the step attributions of a \code{future_policies = "off"} run across
+#' decomposition steps: the total impact of factor i at year T is
+#' \eqn{\sum_{y \le T} \phi_i^{(y)}(T)}, where \eqn{\phi_i^{(y)}(T)} is the
+#' Shapley value at year T of the year-y policy (\code{extended_decomp}). Summed
+#' over factors this telescopes to (observed) - (all policies off from the first
+#' decomp year) at every T, so it is only meaningful when \code{decomp_years}
+#' is contiguous.
+#'
+#' @param result The list returned by \code{decompose()} with
+#'   \code{extended = TRUE} and \code{future_policies = "off"}.
+#' @return data.table with one row per year x measure (and location, if
+#'   present) and one column per factor.
+#' @export
+sequential_totals <- function(result) {
+  if (!identical(result$params$future_policies, "off"))
+    stop("sequential_totals() needs a decompose(future_policies = \"off\") ",
+         "result: with future policies on, the steps overlap and summing them ",
+         "double-counts.")
+  if (is.null(result$extended_decomp))
+    stop("sequential_totals() needs extended = TRUE")
+  yrs <- sort(unique(result$extended_decomp$decomp_year))
+  if (!identical(yrs, seq(min(yrs), max(yrs))))
+    stop("sequential_totals() needs contiguous decomp_years")
+  vars <- result$params$decomp_vars
+  by <- intersect(c("ihme_loc_id", "year", "measure"), names(result$extended_decomp))
+  result$extended_decomp[, lapply(.SD, sum), by = by, .SDcols = vars]
 }

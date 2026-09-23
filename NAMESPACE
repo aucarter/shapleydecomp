@@ -5,6 +5,7 @@ export(decomp_algebra)
 export(decomp_pair)
 export(make_run_table)
 export(run_decomp)
+export(sequential_totals)
 
 # S3 generics
 export(run_simulation)
