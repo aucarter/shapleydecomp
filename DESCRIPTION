@@ -1,6 +1,6 @@
 Package: decomposer
 Title: Generic Decomposition Framework for Discrete-Time Simulations
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("Austin", "Carter", , "aucarter@uw.edu", role = c("aut", "cre"))
 Description: A model-agnostic decomposition framework that attributes changes in
