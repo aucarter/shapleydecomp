@@ -1,7 +1,7 @@
 # ============================================================================
 # tests/testthat/test-decompose.R
 #
-# Integration test: full decompose() pipeline with a toy model.
+# Integration test: full shapley_decompose() pipeline with a toy model.
 # ============================================================================
 
 library(testthat)
@@ -83,11 +83,11 @@ for (g in c("run_simulation", "summarize_results", "get_baseline_value",
 #  Tests
 # ---------------------------------------------------------------------------
 
-test_that("decompose() works with toy model (change_since)", {
+test_that("shapley_decompose() works with toy model (change_since)", {
   model  <- create_toy_model()
   params <- create_toy_params()
 
-  results <- decompose(
+  results <- shapley_decompose(
     model        = model,
     params       = params,
     factors      = c("factor_a", "factor_b"),
@@ -114,11 +114,11 @@ test_that("decompose() works with toy model (change_since)", {
 })
 
 
-test_that("decompose() works with total_impact", {
+test_that("shapley_decompose() works with total_impact", {
   model  <- create_toy_model()
   params <- create_toy_params()
 
-  results <- decompose(
+  results <- shapley_decompose(
     model        = model,
     params       = params,
     factors      = c("factor_a", "factor_b"),
@@ -142,11 +142,11 @@ test_that("decompose() works with total_impact", {
 })
 
 
-test_that("decompose() produces step_scenarios", {
+test_that("shapley_decompose() produces step_scenarios", {
   model  <- create_toy_model()
   params <- create_toy_params()
 
-  results <- decompose(
+  results <- shapley_decompose(
     model        = model,
     params       = params,
     factors      = c("factor_a", "factor_b"),
@@ -170,11 +170,11 @@ test_that("decompose() produces step_scenarios", {
 })
 
 
-test_that("decompose() produces extended_decomp", {
+test_that("shapley_decompose() produces extended_decomp", {
   model  <- create_toy_model()
   params <- create_toy_params()
 
-  results <- decompose(
+  results <- shapley_decompose(
     model        = model,
     params       = params,
     factors      = c("factor_a", "factor_b"),

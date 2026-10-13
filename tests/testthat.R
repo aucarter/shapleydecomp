@@ -2,6 +2,6 @@
 # tests/testthat.R
 # ============================================================================
 library(testthat)
-library(decomposer)
+library(shapleydecomp)
 
-test_check("decomposer")
+test_check("shapleydecomp")

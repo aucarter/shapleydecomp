@@ -1,11 +1,11 @@
 # ============================================================================
 # sir_model.R
 #
-# Example: implementing the decomposer interface for a simple discrete-time
+# Example: implementing the shapleydecomp interface for a simple discrete-time
 # SIR model. Shipped with the package so that examples, tests and vignettes
 # can share one worked model:
 #
-#   source(system.file("examples", "sir_model.R", package = "decomposer"))
+#   source(system.file("examples", "sir_model.R", package = "shapleydecomp"))
 #
 # Model: SIR with two decomposable factors:
 #   - beta_reduction   (proportional reduction in transmission, e.g. from
@@ -60,7 +60,7 @@ create_sir_params <- function(years = 1990:2020,
 
 
 # ---------------------------------------------------------------------------
-#  2. Implement the decomposer S3 interface
+#  2. Implement the shapleydecomp S3 interface
 # ---------------------------------------------------------------------------
 
 run_simulation.sir_model <- function(model, params, ...) {
@@ -106,7 +106,7 @@ summarize_results.sir_model <- function(model, sim_output, ...) {
 
 get_baseline_value.sir_model <- function(model, params, factor_name, cf_type,
                                          baseline_year, ...) {
-  if (cf_type == decomposer::CF_TOTAL_IMPACT) {
+  if (cf_type == shapleydecomp::CF_TOTAL_IMPACT) {
     return(list(type = "zero"))
   }
   if (!factor_name %in% c("beta_reduction", "treatment_effect")) {
@@ -121,7 +121,7 @@ build_counterfactual.sir_model <- function(model, params, factor_name,
                                            decomp_year, cf_type,
                                            baseline_values, ...) {
   idx <- which(params$years >= decomp_year)
-  if (cf_type == decomposer::CF_TOTAL_IMPACT) {
+  if (cf_type == shapleydecomp::CF_TOTAL_IMPACT) {
     params[[factor_name]][idx] <- 0
   } else {
     params[[factor_name]][idx] <- baseline_values[[factor_name]]$value

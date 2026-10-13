@@ -2,7 +2,7 @@
 % Please edit documentation in R/validate.R
 \name{validate_model_interface}
 \alias{validate_model_interface}
-\title{Validate that a model implements the decomposer interface}
+\title{Validate that a model implements the shapleydecomp interface}
 \usage{
 validate_model_interface(
   model,
@@ -35,7 +35,7 @@ runs a minimal smoke test if parameters and factors are provided.
 }
 \examples{
 sir <- new.env()
-sys.source(system.file("examples", "sir_model.R", package = "decomposer"),
+sys.source(system.file("examples", "sir_model.R", package = "shapleydecomp"),
            envir = sir)
 validate_model_interface(
   sir$create_sir_model(),

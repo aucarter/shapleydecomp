@@ -12,7 +12,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
                       fig.height = 4.2, dpi = 110)
 ```
 
-decomposer answers one question about a simulation model: **how much of an
+shapleydecomp answers one question about a simulation model: **how much of an
 outcome is due to each of its inputs?** You give it a calibrated model and a
 list of factors (treatment coverage, a prevention programme, a demographic
 trend). It runs the model under every combination of observed and
@@ -24,7 +24,7 @@ four S3 methods, so any discrete-time simulation, in R or wrapped from C++,
 can be decomposed once those methods exist.
 
 ```{r setup, message = FALSE}
-library(decomposer)
+library(shapleydecomp)
 ```
 
 ## 1. A model
@@ -36,7 +36,7 @@ This vignette uses a small SIR epidemic with two interventions:
 
 Both scale up linearly from 1990 to 2020. The model object holds the fixed
 structure, and the parameters hold the inputs the decomposition will vary.
-That split matters, because decomposer only modifies `params`.
+That split matters, because shapleydecomp only modifies `params`.
 
 ```{r model}
 create_sir_model <- function(population = 1e5, years = 1990:2020) {
@@ -147,7 +147,7 @@ validate_model_interface(
 ## 4. Decompose
 
 ```{r decompose}
-res <- decompose(
+res <- shapley_decompose(
   model, params,
   factors      = c("beta_reduction", "treatment_effect"),
   summary_vars = c("infections", "deaths"),
@@ -209,7 +209,7 @@ decomposition answers.
   much of the change since the baseline year is due to this factor?*
 
 ```{r change-since}
-since <- decompose(
+since <- shapley_decompose(
   model, params,
   factors       = c("beta_reduction", "treatment_effect"),
   summary_vars  = "infections",

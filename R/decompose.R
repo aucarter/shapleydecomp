@@ -1,9 +1,9 @@
 # ============================================================================
-# decomposer: decompose.R
+# shapleydecomp: decompose.R
 #
 # Main entry point: orchestrates the full decomposition pipeline.
 #
-# The decompose() function:
+# The shapley_decompose() function:
 #   1. Prepares the model (one-time setup)
 #   2. Computes baseline values for each factor
 #   3. Generates the factorial run table
@@ -18,7 +18,7 @@
 #' Run a full decomposition analysis
 #'
 #' This is the main user-facing function. Given a model object that implements
-#' the decomposer S3 interface, it performs a complete factorial decomposition
+#' the shapleydecomp S3 interface, it performs a complete factorial decomposition
 #' of the specified factors across all decomposition years.
 #'
 #' @param model          An S3 model object. Must have methods for
@@ -81,17 +81,17 @@
 #'     \item{run_table}{data.table — the factorial design table used.}
 #'     \item{params}{List of decomposition parameters used.}
 #'   }
-#' @seealso \code{vignette("decomposer")} for a worked example, and
+#' @seealso \code{vignette("shapleydecomp")} for a worked example, and
 #'   \code{\link{validate_model_interface}} to check a model first.
 #' @examples
 #' # A two-factor SIR model shipped with the package
 #' sir <- new.env()
-#' sys.source(system.file("examples", "sir_model.R", package = "decomposer"),
+#' sys.source(system.file("examples", "sir_model.R", package = "shapleydecomp"),
 #'            envir = sir)
 #' model  <- sir$create_sir_model(years = 1990:2010)
 #' params <- sir$create_sir_params(years = 1990:2010)
 #'
-#' res <- decompose(
+#' res <- shapley_decompose(
 #'   model, params,
 #'   factors      = c("beta_reduction", "treatment_effect"),
 #'   summary_vars = c("infections", "deaths"),
@@ -104,21 +104,21 @@
 #' # Each factor's total impact at every year
 #' sequential_totals(res)
 #' @export
-decompose <- function(model,
-                      params,
-                      factors,
-                      summary_vars,
-                      decomp_years,
-                      method         = "shapley",
-                      cf_type        = CF_CHANGE_SINCE,
-                      baseline_year  = min(decomp_years),
-                      decomp_scalar  = 0,
-                      extended       = TRUE,
-                      step_scenarios = TRUE,
-                      verbose        = TRUE,
-                      n_cores        = 1L,
-                      future_policies = c("off", "on"),
-                      ...) {
+shapley_decompose <- function(model,
+                              params,
+                              factors,
+                              summary_vars,
+                              decomp_years,
+                              method         = "shapley",
+                              cf_type        = CF_CHANGE_SINCE,
+                              baseline_year  = min(decomp_years),
+                              decomp_scalar  = 0,
+                              extended       = TRUE,
+                              step_scenarios = TRUE,
+                              verbose        = TRUE,
+                              n_cores        = 1L,
+                              future_policies = c("off", "on"),
+                              ...) {
 
   # ---- Validate inputs ----
   stopifnot(is.character(factors), length(factors) > 0)
@@ -303,15 +303,15 @@ decompose <- function(model,
 #' decomp year) at every T, so it is only meaningful when \code{decomp_years}
 #' is contiguous.
 #'
-#' @param result The list returned by \code{decompose()} with
+#' @param result The list returned by \code{shapley_decompose()} with
 #'   \code{extended = TRUE} and \code{future_policies = "off"}.
 #' @return data.table with one row per year x measure (and location, if
 #'   present) and one column per factor.
-#' @seealso \code{\link{decompose}}, whose examples call this function.
+#' @seealso \code{\link{shapley_decompose}}, whose examples call this function.
 #' @export
 sequential_totals <- function(result) {
   if (!identical(result$params$future_policies, "off"))
-    stop("sequential_totals() needs a decompose(future_policies = \"off\") ",
+    stop("sequential_totals() needs a shapley_decompose(future_policies = \"off\") ",
          "result: with future policies on, the steps overlap and summing them ",
          "double-counts.")
   if (is.null(result$extended_decomp))

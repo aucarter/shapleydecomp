@@ -1,3 +1,16 @@
+# shapleydecomp 0.3.0
+
+* The package is renamed from `decomposer` to `shapleydecomp`. CRAN already
+  hosts `DecomposeR`, and CRAN package names are case-insensitive. The API
+  is otherwise unchanged: replace `library(decomposer)` / `decomposer::` with
+  `shapleydecomp`.
+* `decompose()` is renamed `shapley_decompose()`, so it no longer masks
+  `stats::decompose()`. The arguments and return value are unchanged.
+* All exported functions are documented with examples. There are two new
+  vignettes, *Get started* and *Methods*, and a pkgdown site.
+* `make_run_table()` now prints when called at top level.
+* `shapley_decompose()` reports progress with `message()` instead of `cat()`.
+
 # decomposer 0.2.0
 
 * `decompose()` gains `future_policies`, defaulting to `"off"`: sequential

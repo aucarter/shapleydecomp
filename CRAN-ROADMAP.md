@@ -2,37 +2,35 @@
 
 Status as of 2026-10-13, from `R CMD check --as-cran` on R 4.4.2.
 
-| | Before (`main` @ `b8fea0d`) | Now (`pkgdown-site`) |
+| | Before (`decomposer` 0.2.0) | Now (`shapleydecomp` 0.3.0) |
 |---|---|---|
-| ERROR | 1: package name conflicts with `DecomposeR` | 1: same name conflict, plus Pages URLs that 404 until the site is deployed |
+| ERROR | 1: package name conflicts with `DecomposeR` | 0 |
 | WARNING | 1: all 17 exports undocumented, no `man/` | 0 from the package (`qpdf` missing on the cluster host only) |
-| NOTE | 3: non-standard top-level dirs, undeclared globals, `getS3method` not imported | 0 from the package (the "future file timestamps" note comes from the host's clock check) |
+| NOTE | 3: non-standard top-level dirs, undeclared globals, `getS3method` not imported | 1: "new submission", plus site URLs until the site is deployed |
 | Examples / tests / vignettes | none / OK / none | OK / OK / OK |
 
 ## 1. Blockers
 
-### 1.1 Rename the package (decision needed)
+### 1.1 Package name: resolved
 
-CRAN compares package names case-insensitively. `DecomposeR` is already on
-CRAN, so both `decomposer` and the GitHub repo's new name `decomposeR` will be
-refused at the incoming-feasibility check. This is the only check failure that
-depends on a decision rather than on more work.
+CRAN compares package names case-insensitively, and `DecomposeR` is already
+on CRAN, so `decomposer` / `decomposeR` would have been refused. The package
+is now **`shapleydecomp`**, in the GitHub repo `aucarter/shapleydecomp`, and
+the main entry point is **`shapley_decompose()`**, which no longer masks
+`stats::decompose()`. The incoming-feasibility name check now passes.
 
-Candidates that are free on CRAN, both current and archived (checked
-2026-10-13): `simshapley`, `shapleysim`, `simdecomp`, `shapleydecomp`,
-`decompshapley`, `factordecomp`, `simattrib`.
+Callers outside this repo still use the old name. They keep working because
+they load the installed `decomposer 0.2.0` build, and each needs moving when
+it next takes an update:
+- `leapfrog_adulthiv`: `r_libs.lock` pins `decomposer 0.2.0`, and
+  `R/decomp_structural.R` calls `decomposer::`. Install a `shapleydecomp`
+  build with `install_pinned()`, bump the lockfile, and replace `decomposer::`
+  and `decompose(` in the same commit.
+- `hiv_decomp/R/adapters/*.R`: `decomposer::CF_TOTAL_IMPACT` and the related
+  constants.
+- `manuscript/main.tex`: `\pkg{decomposer}` throughout.
 
-The rename reaches beyond this repo:
-- `leapfrog_adulthiv` pins `decomposer 0.2.0` in `r_libs.lock`, and
-  `R/decomp_structural.R` calls `decomposer::`.
-- `hiv_decomp/R/adapters/*.R` call `decomposer::CF_TOTAL_IMPACT` and the
-  related constants.
-- The manuscript (`manuscript/main.tex`) uses `\pkg{decomposer}` throughout.
-
-Do it in one coordinated change. A good time is the next lockfile bump: install
-the renamed build alongside the old one, then move each caller.
-
-### 1.2 Deploy the site so its URLs resolve
+### 1.2 Deploy the site so its URLs resolve: in progress
 
 `DESCRIPTION`, the README and the package help page link to
 `https://aucarter.github.io/decomposeR/`. CRAN checks every URL, and these
@@ -52,7 +50,7 @@ enable Pages in the repo settings with source branch `gh-pages`, folder `/`.
   Shapley).
 - Tests register their toy methods with `.S3method()` instead of writing to
   `.GlobalEnv` with `<<-`. CRAN policy forbids modifying the user's workspace.
-- `decompose()` reports progress with `message()` instead of `cat()`, so
+- `shapley_decompose()` reports progress with `message()` instead of `cat()`, so
   `verbose = FALSE` and `suppressMessages()` both silence it.
 - `make_run_table()` now prints when called at top level. It used to return
   directly after a `:=`, so its first auto-print was suppressed.
@@ -70,9 +68,8 @@ come back.
 
 | Item | Where | Why | Size |
 |---|---|---|---|
-| `decompose()` masks `stats::decompose` | `R/decompose.R` | Every `library()` call prints a masking message, and code that uses `stats::decompose()` for time series breaks silently. Rename it (e.g. `shapley_decompose()`) together with the package. It touches the same callers as 1.1. | S |
-| Hard-coded `ihme_loc_id` grouping | `run_decomp()`, `decompose()`, `sequential_totals()` | A generic package should not recognise one institution's column name. Replace it with a `by` argument whose default reproduces today's behaviour. | S |
-| Internal reference in the docs | `decompose()` `@param future_policies` | Mentions `hiv_decomp run_simmod_mean.R`, which no outside reader can see. Cite the manuscript instead. | S |
+| Hard-coded `ihme_loc_id` grouping | `run_decomp()`, `shapley_decompose()`, `sequential_totals()` | A generic package should not recognise one institution's column name. Replace it with a `by` argument whose default reproduces today's behaviour. | S |
+| Internal reference in the docs | `shapley_decompose()` `@param future_policies` | Mentions `hiv_decomp run_simmod_mean.R`, which no outside reader can see. Cite the manuscript instead. | S |
 | Maintainer email | `DESCRIPTION` | CRAN mails the maintainer about every check failure for the life of the package, and an address that bounces leads to archival. Choose an address you will keep. | S |
 | References in `Description` | `DESCRIPTION` | CRAN asks for method references in the form `Authors (year) <doi:...>`: Shapley (1953) <doi:10.1515/9781400881970-018>, Das Gupta (1993), and the manuscript once it has a DOI. Also add `inst/CITATION`. | S |
 | Stale comment | `R/run_table.R` header | Says "3^n rows if decomp_scalar = 0"; the code produces 2^n binary rows. | S |
@@ -81,9 +78,8 @@ come back.
 
 ## 4. Submission steps
 
-1. Settle the name (1.1). Rename the package, the repo if desired, the
-   `_pkgdown.yml` url and the callers.
-2. Merge `pkgdown-site`, confirm the site deploys and the CI matrix is green.
+1. Confirm the site deploys and the CI matrix is green.
+2. Move the callers listed in 1.1 when convenient. CRAN does not need this.
 3. Work through section 3.
 4. Bump the version (suggest `1.0.0`, given the API commitment) and update
    `NEWS.md`.
@@ -97,7 +93,7 @@ come back.
 8. Expect one round of reviewer comments for a first submission (usually
    1–3 weeks). Address them, bump the patch version, and resubmit.
 
-Rough effort: about a day of work (L) once the name is settled, plus
+Rough effort: about half a day (M) for section 3 and the submission, plus
 calendar time for CRAN's review.
 
 ## 5. After acceptance

@@ -1,8 +1,8 @@
-# decomposer
+# shapleydecomp
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/aucarter/decomposeR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aucarter/decomposeR/actions/workflows/R-CMD-check.yaml)
-[![pkgdown](https://github.com/aucarter/decomposeR/actions/workflows/pkgdown.yaml/badge.svg)](https://aucarter.github.io/decomposeR/)
+[![R-CMD-check](https://github.com/aucarter/shapleydecomp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aucarter/shapleydecomp/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/aucarter/shapleydecomp/actions/workflows/pkgdown.yaml/badge.svg)](https://aucarter.github.io/shapleydecomp/)
 <!-- badges: end -->
 
 A model-agnostic decomposition framework for discrete-time simulations.
@@ -11,17 +11,17 @@ A model-agnostic decomposition framework for discrete-time simulations.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("aucarter/decomposeR")
+remotes::install_github("aucarter/shapleydecomp")
 ```
 
 New to the package? Start with the
-[Get started](https://aucarter.github.io/decomposeR/articles/decomposer.html)
-article. The [Methods](https://aucarter.github.io/decomposeR/articles/methods.html)
+[Get started](https://aucarter.github.io/shapleydecomp/articles/shapleydecomp.html)
+article. The [Methods](https://aucarter.github.io/shapleydecomp/articles/methods.html)
 article covers the maths.
 
 ## Overview
 
-`decomposer` attributes changes in simulation outcomes to individual input
+`shapleydecomp` attributes changes in simulation outcomes to individual input
 factors using **Shapley value decomposition**. Any calibrated discrete-time
 simulation model can use this package by implementing a small set of S3
 methods.
@@ -37,7 +37,7 @@ The package supports two modes of counterfactual analysis:
 
 ## Implementing the Interface
 
-To use `decomposer` with your model, create an S3 class and implement these
+To use `shapleydecomp` with your model, create an S3 class and implement these
 **required** methods:
 
 ```r
@@ -80,13 +80,13 @@ run_from_warm_start.my_model <- function(model, warm_state, params,
 ## Quick Start
 
 ```r
-library(decomposer)
+library(shapleydecomp)
 
 # Create your model object (S3 class with methods above)
 model <- create_my_model(...)
 
 # Run decomposition
-results <- decompose(
+results <- shapley_decompose(
   model        = model,
   params       = my_params,
   factors      = c("treatment_a", "treatment_b", "demographic_x"),

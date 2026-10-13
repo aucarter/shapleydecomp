@@ -1,19 +1,19 @@
-Package: decomposer
+Package: shapleydecomp
 Title: Generic Decomposition Framework for Discrete-Time Simulations
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     person("Austin", "Carter", , "aucarter@uw.edu", role = c("aut", "cre"))
 Description: A model-agnostic decomposition framework that attributes changes in
     simulation outcomes to individual input factors using Shapley value
-    decomposition. Any calibrated discrete-time simulation model can use the
-    decomposer by implementing a small set of S3 methods: run the model,
+    decomposition. Any calibrated discrete-time simulation model can be
+    decomposed by implementing a small set of S3 methods: run the model,
     summarize outputs, and construct counterfactual inputs. Supports two
     counterfactual types: "change_since" (hold factor at baseline-year value)
     and "total_impact" (set factor to zero).
 License: MIT + file LICENSE
-URL: https://github.com/aucarter/decomposeR,
-    https://aucarter.github.io/decomposeR/
-BugReports: https://github.com/aucarter/decomposeR/issues
+URL: https://github.com/aucarter/shapleydecomp,
+    https://aucarter.github.io/shapleydecomp/
+BugReports: https://github.com/aucarter/shapleydecomp/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

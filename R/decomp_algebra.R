@@ -1,5 +1,5 @@
 # ============================================================================
-# decomposer: decomp_algebra.R
+# shapleydecomp: decomp_algebra.R
 #
 # Model-agnostic Shapley value decomposition algebra.
 #

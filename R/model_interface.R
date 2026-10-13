@@ -1,8 +1,8 @@
 # ============================================================================
-# decomposer: model_interface.R
+# shapleydecomp: model_interface.R
 #
 # S3 generic functions that any discrete-time simulation model must implement
-# to use the decomposer framework.
+# to use the shapleydecomp framework.
 #
 # Required methods:
 #   - run_simulation()        Run the model with given parameters
@@ -176,7 +176,7 @@ prepare_decomp.default <- function(model, params, ...) {
 
 #' Check whether a model supports warm starts
 #'
-#' If TRUE, the decomposer will use \code{get_warm_start_state()} and
+#' If TRUE, the shapleydecomp will use \code{get_warm_start_state()} and
 #' \code{run_from_warm_start()} to avoid re-simulating years before each
 #' decomposition year.
 #'

@@ -1,5 +1,5 @@
 # ============================================================================
-# decomposer: run_table.R
+# shapleydecomp: run_table.R
 #
 # Generate the factorial design table for decomposition. Each row is one
 # counterfactual combination: for n factors, there are 2^n rows (binary

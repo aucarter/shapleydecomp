@@ -7,7 +7,7 @@
 sequential_totals(result)
 }
 \arguments{
-\item{result}{The list returned by \code{decompose()} with
+\item{result}{The list returned by \code{shapley_decompose()} with
 \code{extended = TRUE} and \code{future_policies = "off"}.}
 }
 \value{
@@ -24,5 +24,5 @@ decomp year) at every T, so it is only meaningful when \code{decomp_years}
 is contiguous.
 }
 \seealso{
-\code{\link{decompose}}, whose examples call this function.
+\code{\link{shapley_decompose}}, whose examples call this function.
 }

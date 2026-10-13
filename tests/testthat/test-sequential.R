@@ -44,7 +44,7 @@ for (g in c("run_simulation", "summarize_results", "get_baseline_value",
 
 run_mem <- function(future) {
   m <- structure(list(), class = "mem_model")
-  decompose(m, create_mem_params(), factors = c("a", "b"),
+  shapley_decompose(m, create_mem_params(), factors = c("a", "b"),
             summary_vars = "burden", decomp_years = mem_years,
             cf_type = CF_TOTAL_IMPACT, future_policies = future,
             step_scenarios = TRUE, verbose = FALSE)

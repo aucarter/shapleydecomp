@@ -15,7 +15,7 @@ supports_warm_start(model, ...)
 Logical
 }
 \description{
-If TRUE, the decomposer will use \code{get_warm_start_state()} and
+If TRUE, the shapleydecomp will use \code{get_warm_start_state()} and
 \code{run_from_warm_start()} to avoid re-simulating years before each
 decomposition year.
 }

@@ -1,4 +1,4 @@
-url: https://aucarter.github.io/decomposeR/
+url: https://aucarter.github.io/shapleydecomp/
 
 template:
   bootstrap: 5
@@ -12,7 +12,7 @@ template:
   math-rendering: katex
 
 home:
-  title: "decomposer: Shapley decomposition for discrete-time simulations"
+  title: "shapleydecomp: Shapley decomposition for discrete-time simulations"
   sidebar:
     structure: [links, license, citation, authors, dev]
 
@@ -25,7 +25,7 @@ reference:
   - title: Run a decomposition
     desc: The entry point and its companions.
     contents:
-      - decompose
+      - shapley_decompose
       - sequential_totals
       - validate_model_interface
       - cf_types
@@ -53,11 +53,11 @@ reference:
       - decomp_pair
   - title: internal
     contents:
-      - decomposer-package
+      - shapleydecomp-package
 
 articles:
   - title: Articles
     navbar: ~
     contents:
-      - decomposer
+      - shapleydecomp
       - methods

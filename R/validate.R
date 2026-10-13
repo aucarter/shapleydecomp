@@ -1,11 +1,11 @@
 # ============================================================================
-# decomposer: validate.R
+# shapleydecomp: validate.R
 #
 # Validation utilities for checking that a model correctly implements the
-# decomposer S3 interface.
+# shapleydecomp S3 interface.
 # ============================================================================
 
-#' Validate that a model implements the decomposer interface
+#' Validate that a model implements the shapleydecomp interface
 #'
 #' Checks that the required S3 methods exist for the given model class and
 #' runs a minimal smoke test if parameters and factors are provided.
@@ -21,7 +21,7 @@
 #' @family model interface
 #' @examples
 #' sir <- new.env()
-#' sys.source(system.file("examples", "sir_model.R", package = "decomposer"),
+#' sys.source(system.file("examples", "sir_model.R", package = "shapleydecomp"),
 #'            envir = sir)
 #' validate_model_interface(
 #'   sir$create_sir_model(),
@@ -35,7 +35,7 @@ validate_model_interface <- function(model, params = NULL, factors = NULL,
                                      summary_vars = NULL, baseline_year = NULL,
                                      verbose = TRUE) {
   cls <- class(model)[1]
-  if (verbose) message(sprintf("Validating decomposer interface for class '%s'", cls))
+  if (verbose) message(sprintf("Validating shapleydecomp interface for class '%s'", cls))
 
   # Check required methods exist
   required <- c("run_simulation", "summarize_results",

@@ -9,7 +9,7 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-suppressPackageStartupMessages(library(decomposer))
+suppressPackageStartupMessages(library(shapleydecomp))
 ```
 
 ## Setup
@@ -28,7 +28,7 @@ into contributions $\delta_i$ with $\sum_i \delta_i = \Delta Y_t$ exactly.
 ## Factorial design
 
 For $n$ factors there are $2^n$ on/off combinations. `make_run_table()`
-enumerates them, and `decompose()` runs the model once per row.
+enumerates them, and `shapley_decompose()` runs the model once per row.
 
 ```{r}
 make_run_table(c("a", "b", "c"))
@@ -94,7 +94,7 @@ reference rate.
 
 Simulations carry state forward. Infections averted in 2005 change the
 susceptible pool in 2010. A single decomposition at a late year would credit
-every past policy at once, so `decompose()` works year by year.
+every past policy at once, so `shapley_decompose()` works year by year.
 
 At each decomposition year $y$, with the default `future_policies = "off"`:
 
@@ -123,7 +123,7 @@ rows include future policies, so they must not be summed across steps.
 
 ## Reference
 
-Carter A. *decomposer: A model-agnostic framework for factorial
+Carter A. *A model-agnostic framework for factorial
 decomposition of discrete-time simulation outcomes, with a proof of
 equivalence between Das Gupta and Shapley value decomposition.*
 Manuscript in preparation.
