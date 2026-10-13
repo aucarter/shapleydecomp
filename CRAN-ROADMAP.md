@@ -30,7 +30,11 @@ it next takes an update:
   constants.
 - `manuscript/main.tex`: `\pkg{decomposer}` throughout.
 
-### 1.2 Deploy the site so its URLs resolve: in progress
+### 1.2 Deploy the site so its URLs resolve: done
+
+Live at https://aucarter.github.io/shapleydecomp/ since 2026-10-13. The
+R-CMD-check workflow passed on all five platforms (macOS, Windows, and
+Ubuntu on devel / release / oldrel-1) at `ddd2957`.
 
 `DESCRIPTION`, the README and the package help page link to
 `https://aucarter.github.io/decomposeR/`. CRAN checks every URL, and these
@@ -78,7 +82,7 @@ come back.
 
 ## 4. Submission steps
 
-1. Confirm the site deploys and the CI matrix is green.
+1. ~~Confirm the site deploys and the CI matrix is green.~~ Done.
 2. Move the callers listed in 1.1 when convenient. CRAN does not need this.
 3. Work through section 3.
 4. Bump the version (suggest `1.0.0`, given the API commitment) and update
