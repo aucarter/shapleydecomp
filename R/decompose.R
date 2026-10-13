@@ -56,17 +56,20 @@
 #'   and only the year-y policy varies across coalitions. The attribution at
 #'   step y is then the marginal impact of the year-y policy conditional on the
 #'   past and undiluted by the future, and \code{sequential_totals()} sums the
-#'   steps into each factor's total impact at every year. This is the default,
-#'   and matches the published pediatric implementation (hiv_decomp
-#'   run_simmod_mean.R). \code{"on"} (the pre-2026-09 behaviour, kept for
+#'   steps into each factor's total impact at every year. This is the
+#'   default. \code{"on"} (the behaviour before version 0.2.0, kept for
 #'   reproducing old runs) leaves a factor that is "on" in a coalition at its
 #'   observed values for ALL years, including after y; its same-year
 #'   attribution equals \code{"off"}'s for any causal model, but its
 #'   \code{extended_decomp} rows (year > decomp year) include future policies
 #'   and must not be summed across steps.
+#' @param group_vars     Character vector of columns in the output of
+#'   \code{summarize_results()} that identify independent groups, such as
+#'   locations or draws, each decomposed separately. Default none.
 #' @param n_cores        Integer, number of cores for parallel counterfactual
 #'   simulation runs. Default 1 (sequential). Values > 1 use
-#'   \code{parallel::mclapply()} (Unix/Mac only).
+#'   \code{parallel::mclapply()}. Windows does not support forking, so there
+#'   it falls back to sequential with a warning.
 #' @param ...            Additional arguments passed to model methods.
 #'
 #' @return A list with components:
@@ -117,6 +120,7 @@ shapley_decompose <- function(model,
                               step_scenarios = TRUE,
                               verbose        = TRUE,
                               n_cores        = 1L,
+                              group_vars     = character(),
                               future_policies = c("off", "on"),
                               ...) {
 
@@ -125,11 +129,17 @@ shapley_decompose <- function(model,
   stopifnot(is.character(summary_vars), length(summary_vars) > 0)
   stopifnot(is.numeric(decomp_years), length(decomp_years) > 0)
   stopifnot(cf_type %in% c(CF_CHANGE_SINCE, CF_TOTAL_IMPACT))
+  stopifnot(is.character(group_vars))
   method <- normalize_decomp_method(method)
   future_policies <- match.arg(future_policies)
 
   decomp_years <- sort(as.integer(decomp_years))
   n_cores <- as.integer(max(n_cores, 1L))
+  if (n_cores > 1L && .Platform$OS.type == "windows") {
+    warning("n_cores > 1 uses forking, which Windows does not support; ",
+            "running sequentially.", call. = FALSE)
+    n_cores <- 1L
+  }
 
   # ---- Build decomposition parameter bundle ----
   decomp_params <- list(
@@ -138,6 +148,7 @@ shapley_decompose <- function(model,
     decomp_method = method,
     cf_type       = cf_type,
     baseline_year = baseline_year,
+    group_vars    = group_vars,
     future_policies = future_policies
   )
 
@@ -250,7 +261,7 @@ shapley_decompose <- function(model,
     # ---- Step scenarios ----
     if (step_scenarios) {
       sv_cols <- intersect(summary_vars, names(summary_dt))
-      step_cols <- c("year", sv_cols)
+      step_cols <- c(group_vars, "year", sv_cols)
 
       step_list[[as.character(y)]] <<- cbind(
         data.table(step_year = y),
@@ -268,7 +279,7 @@ shapley_decompose <- function(model,
 
     # ---- Extended factor decomposition ----
     if (extended) {
-      ext_group <- intersect(c("ihme_loc_id", "year"), names(summary_dt))
+      ext_group <- c(group_vars, "year")
       ext <- summary_dt[year >= y, decomp_algebra(.SD, decomp_params), by = ext_group]
       ext[, decomp_year := y]
       ext_decomp_list[[as.character(y)]] <<- ext
@@ -305,8 +316,8 @@ shapley_decompose <- function(model,
 #'
 #' @param result The list returned by \code{shapley_decompose()} with
 #'   \code{extended = TRUE} and \code{future_policies = "off"}.
-#' @return data.table with one row per year x measure (and location, if
-#'   present) and one column per factor.
+#' @return data.table with one row per group x year x measure and one column
+#'   per factor.
 #' @seealso \code{\link{shapley_decompose}}, whose examples call this function.
 #' @export
 sequential_totals <- function(result) {
@@ -320,6 +331,6 @@ sequential_totals <- function(result) {
   if (!identical(yrs, seq(min(yrs), max(yrs))))
     stop("sequential_totals() needs contiguous decomp_years")
   vars <- result$params$decomp_vars
-  by <- intersect(c("ihme_loc_id", "year", "measure"), names(result$extended_decomp))
+  by <- c(result$params$group_vars, "year", "measure")
   result$extended_decomp[, lapply(.SD, sum), by = by, .SDcols = vars]
 }

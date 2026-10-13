@@ -7,9 +7,9 @@
 run_decomp(data, params)
 }
 \arguments{
-\item{data}{A \code{data.table} with columns: \code{ihme_loc_id},
-\code{decomp_year}, one column per decomp variable (0/1 indicator), and
-one column per summary variable.}
+\item{data}{A \code{data.table} with one column per decomp variable (0/1
+indicator), one column per summary variable, and optionally a
+\code{decomp_year} column and the \code{group_vars} columns.}
 
 \item{params}{A list with at least:
 \describe{
@@ -17,15 +17,16 @@ one column per summary variable.}
 \item{decomp_vars}{Character vector of factor column names (0/1 indicators)}
 \item{decomp_method}{Character, \code{"shapley"} (\code{"das_gupta"}
 accepted as a deprecated alias)}
+\item{group_vars}{Optional character vector of grouping columns,
+such as a location identifier}
 }}
 }
 \value{
-A \code{data.table} with one row per location × decomp-year ×
+A \code{data.table} with one row per group × decomp-year ×
 measure, and one column per factor giving its decomposition effect.
 }
 \description{
-Applies \code{decomp_algebra()} to each location × decomp-year group in
-the data.
+Applies \code{decomp_algebra()} to each group × decomp-year in the data.
 }
 \examples{
 # Outcomes for every on/off combination of two factors, where the

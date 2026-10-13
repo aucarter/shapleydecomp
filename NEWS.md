@@ -8,6 +8,15 @@
   `stats::decompose()`. The arguments and return value are unchanged.
 * All exported functions are documented with examples. There are two new
   vignettes, *Get started* and *Methods*, and a pkgdown site.
+* New `group_vars` argument to `shapley_decompose()` (and `group_vars` in
+  `run_decomp()` params) names the columns, such as a location, that identify
+  independent groups. It replaces the hard-coded `ihme_loc_id` grouping.
+* The warm-start methods are documented together under `?warm_start`, with
+  a runnable example. The documentation now describes the actual contract:
+  `run_from_warm_start()` receives the observed simulation and
+  `warm_start_year`.
+* `n_cores > 1` on Windows falls back to sequential with a warning instead of
+  failing.
 * `make_run_table()` now prints when called at top level.
 * `shapley_decompose()` reports progress with `message()` instead of `cat()`.
 

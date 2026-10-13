@@ -67,18 +67,29 @@ enable Pages in the repo settings with source branch `gh-pages`, folder `/`.
 
 ## 3. Should fix before submitting
 
-CRAN reviewers read these, and they cost an extra round of review if they
-come back.
+Done (2026-10-13):
+- `ihme_loc_id` grouping replaced by a `group_vars` argument
+  (`shapley_decompose()`, `run_decomp()`, `sequential_totals()`).
+- The internal `hiv_decomp` reference removed from the `future_policies` docs.
+- `DESCRIPTION` rewritten, with references in CRAN form: Shapley (1953)
+  <doi:10.1515/9781400881970-018> (DOI verified against Crossref) and
+  Das Gupta (1993) <Census Bureau P23-186 PDF> (URL verified).
+- The stale run-table comment fixed.
+- Spelling pass, with domain terms in `inst/WORDLIST`. URL check: all URLs
+  correct.
+- Found along the way: the warm-start docs described a contract the code
+  doesn't follow. They now document what `shapley_decompose()` actually
+  passes, with a runnable example. `n_cores > 1` on Windows now falls back
+  instead of erroring.
 
-| Item | Where | Why | Size |
-|---|---|---|---|
-| Hard-coded `ihme_loc_id` grouping | `run_decomp()`, `shapley_decompose()`, `sequential_totals()` | A generic package should not recognise one institution's column name. Replace it with a `by` argument whose default reproduces today's behaviour. | S |
-| Internal reference in the docs | `shapley_decompose()` `@param future_policies` | Mentions `hiv_decomp run_simmod_mean.R`, which no outside reader can see. Cite the manuscript instead. | S |
-| Maintainer email | `DESCRIPTION` | CRAN mails the maintainer about every check failure for the life of the package, and an address that bounces leads to archival. Choose an address you will keep. | S |
-| References in `Description` | `DESCRIPTION` | CRAN asks for method references in the form `Authors (year) <doi:...>`: Shapley (1953) <doi:10.1515/9781400881970-018>, Das Gupta (1993), and the manuscript once it has a DOI. Also add `inst/CITATION`. | S |
-| Stale comment | `R/run_table.R` header | Says "3^n rows if decomp_scalar = 0"; the code produces 2^n binary rows. | S |
-| Title and description wording | `DESCRIPTION` | Quote software names in single quotes (`'data.table'`) and avoid starting with "A ...". These are routine first-review comments. | S |
-| Spelling and URL pass | | Run `spelling::spell_check_package()` and `urlchecker::url_check()`. | S |
+Still open (tracked as GitHub issues):
+- Confirm the maintainer email, then run the external checks and submit
+  (tracking issue).
+- Give the full citation for the sequential-Shapley reference in the
+  `future_policies` docs.
+- `decomp_scalar` values other than 0 give wrong results.
+- Rename `\pkg{decomposer}` in the manuscript, and add `inst/CITATION` once
+  it has a DOI.
 
 ## 4. Submission steps
 

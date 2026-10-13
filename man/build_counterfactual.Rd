@@ -43,12 +43,10 @@ specified factor is set to its counterfactual value from
 \seealso{
 Other model interface: 
 \code{\link{get_baseline_value}()},
-\code{\link{get_warm_start_state}()},
 \code{\link{prepare_decomp}()},
-\code{\link{run_from_warm_start}()},
 \code{\link{run_simulation}()},
 \code{\link{summarize_results}()},
-\code{\link{supports_warm_start}()},
-\code{\link{validate_model_interface}()}
+\code{\link{validate_model_interface}()},
+\code{\link{warm_start}}
 }
 \concept{model interface}

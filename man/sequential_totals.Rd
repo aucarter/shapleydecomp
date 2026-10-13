@@ -11,8 +11,8 @@ sequential_totals(result)
 \code{extended = TRUE} and \code{future_policies = "off"}.}
 }
 \value{
-data.table with one row per year x measure (and location, if
-present) and one column per factor.
+data.table with one row per group x year x measure and one column
+per factor.
 }
 \description{
 Sums the step attributions of a \code{future_policies = "off"} run across

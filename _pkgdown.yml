@@ -39,9 +39,7 @@ reference:
       - get_baseline_value
       - build_counterfactual
       - prepare_decomp
-      - supports_warm_start
-      - get_warm_start_state
-      - run_from_warm_start
+      - warm_start
   - title: Decomposition algebra
     desc: >
       Model-free building blocks. Use them directly if you already have

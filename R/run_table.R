@@ -2,8 +2,8 @@
 # shapleydecomp: run_table.R
 #
 # Generate the factorial design table for decomposition. Each row is one
-# counterfactual combination: for n factors, there are 2^n rows (binary
-# on/off) or 3^n rows if decomp_scalar = 0 (allowing intermediate levels).
+# counterfactual combination. Factor levels run over decomp_scalar:1, so the
+# default decomp_scalar = 0 gives 2^n binary on/off rows for n factors.
 # ============================================================================
 
 #' Generate the factorial run table for decomposition

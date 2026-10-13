@@ -85,7 +85,7 @@ test_that("decomposition effects sum to total difference (Shapley)", {
 
 test_that("run_decomp handles grouped data", {
   dt <- data.table(
-    ihme_loc_id = rep(c("AAA", "BBB"), each = 4),
+    location = rep(c("AAA", "BBB"), each = 4),
     decomp_year = rep(2020, 8),
     A = rep(c(0, 1, 0, 1), 2),
     B = rep(c(0, 0, 1, 1), 2),
@@ -94,7 +94,8 @@ test_that("run_decomp handles grouped data", {
   params <- list(
     decomp_vars = c("A", "B"),
     decomp_method = "shapley",
-    summary_vars = "outcome"
+    summary_vars = "outcome",
+    group_vars = "location"
   )
 
   result <- run_decomp(dt, params)

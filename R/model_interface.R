@@ -174,19 +174,107 @@ prepare_decomp.default <- function(model, params, ...) {
 }
 
 
-#' Check whether a model supports warm starts
+#' Warm starts
 #'
-#' If TRUE, the shapleydecomp will use \code{get_warm_start_state()} and
-#' \code{run_from_warm_start()} to avoid re-simulating years before each
-#' decomposition year.
+#' Optional methods that let \code{shapley_decompose()} skip re-simulating
+#' the years before each decomposition year. Up to year \eqn{y - 1} every
+#' coalition run is identical to the observed run, so a model that can
+#' restart from saved state only needs to simulate from \eqn{y} onward.
 #'
-#' The default method returns FALSE.
+#' When \code{supports_warm_start()} returns \code{TRUE},
+#' \code{shapley_decompose()} calls
+#' \code{run_from_warm_start(model, warm_state, params, output_years,
+#' warm_start_year = y - 1, ...)} for every counterfactual run instead of
+#' \code{run_simulation()}. \code{warm_state} is the observed simulation
+#' output (the \code{full_sim} returned by \code{prepare_decomp()}).
+#' \code{run_from_warm_start()} extracts the state at the end of
+#' \code{warm_start_year} from it, typically by calling
+#' \code{get_warm_start_state(model, warm_state, warm_start_year)}, and
+#' simulates forward with the counterfactual \code{params}.
+#' \code{shapley_decompose()} itself never calls \code{get_warm_start_state()}.
+#' It is the conventional helper for that extraction step.
 #'
-#' @param model  An S3 model object
-#' @param ...    Additional arguments
+#' The default \code{supports_warm_start()} returns \code{FALSE}. The default
+#' \code{get_warm_start_state()} and \code{run_from_warm_start()} methods
+#' throw an error.
 #'
-#' @return Logical
+#' @param model         An S3 model object
+#' @param sim_output    Observed simulation output from \code{run_simulation()}
+#' @param year          Integer, the year whose end-of-year state to extract
+#' @param warm_state    Observed simulation output to restart from (the
+#'   \code{full_sim} element returned by \code{prepare_decomp()})
+#' @param params        Model parameters (possibly counterfactual)
+#' @param output_years  Integer vector of years the output must cover
+#' @param ...           Additional arguments. \code{shapley_decompose()}
+#'   passes \code{warm_start_year} to \code{run_from_warm_start()} here.
+#'
+#' @return \code{supports_warm_start()}: logical.
+#'   \code{get_warm_start_state()}: a model state object in a model-specific
+#'   format. \code{run_from_warm_start()}: raw simulation output in the same
+#'   format as \code{run_simulation()}, covering at least
+#'   \code{output_years}.
 #' @family model interface
+#' @name warm_start
+#' @examples
+#' # A stock that decays by 20% a year and receives input x:
+#' # s_t = 0.8 * s_{t-1} + x_t
+#' run_simulation.stock_model <- function(model, params, ...) {
+#'   s <- as.numeric(stats::filter(params$x, 0.8, method = "recursive"))
+#'   data.table::data.table(year = params$years, stock = s)
+#' }
+#' summarize_results.stock_model <- function(model, sim_output, ...) sim_output
+#' get_baseline_value.stock_model <- function(model, params, factor_name,
+#'                                            cf_type, baseline_year, ...) {
+#'   list(type = "zero")
+#' }
+#' build_counterfactual.stock_model <- function(model, params, factor_name,
+#'                                              decomp_year, cf_type,
+#'                                              baseline_values, ...) {
+#'   params$x[params$years >= decomp_year] <- 0
+#'   params
+#' }
+#'
+#' # Warm start: restart from the observed stock at the end of
+#' # warm_start_year and simulate only the remaining years
+#' supports_warm_start.stock_model <- function(model, ...) TRUE
+#' get_warm_start_state.stock_model <- function(model, sim_output, year, ...) {
+#'   s <- sim_output$stock[sim_output$year == year]
+#'   # Before the first simulated year there is no stock yet
+#'   if (length(s) == 0) 0 else s
+#' }
+#' run_from_warm_start.stock_model <- function(model, warm_state, params,
+#'                                             output_years, warm_start_year,
+#'                                             ...) {
+#'   s0   <- get_warm_start_state(model, warm_state, warm_start_year)
+#'   keep <- params$years > warm_start_year
+#'   s <- as.numeric(stats::filter(params$x[keep], 0.8, method = "recursive",
+#'                                 init = s0))
+#'   data.table::data.table(year = params$years[keep], stock = s)
+#' }
+#'
+#' for (g in c("run_simulation", "summarize_results", "get_baseline_value",
+#'             "build_counterfactual", "supports_warm_start",
+#'             "get_warm_start_state", "run_from_warm_start")) {
+#'   .S3method(g, "stock_model", get(paste0(g, ".stock_model")))
+#' }
+#'
+#' params <- list(years = 2000:2010, x = rep(1, 11))
+#' warm <- shapley_decompose(structure(list(), class = "stock_model"), params,
+#'                           factors = "x", summary_vars = "stock",
+#'                           decomp_years = 2000:2010,
+#'                           cf_type = "total_impact", verbose = FALSE)
+#'
+#' # The same model without warm starts gives the same answer
+#' .S3method("supports_warm_start", "stock_cold", function(model, ...) FALSE)
+#' cold <- shapley_decompose(structure(list(), class = c("stock_cold",
+#'                                                       "stock_model")),
+#'                           params, factors = "x", summary_vars = "stock",
+#'                           decomp_years = 2000:2010,
+#'                           cf_type = "total_impact", verbose = FALSE)
+#' all.equal(warm$decomp, cold$decomp)
+NULL
+
+#' @rdname warm_start
 #' @export
 supports_warm_start <- function(model, ...) {
   UseMethod("supports_warm_start")
@@ -198,15 +286,7 @@ supports_warm_start.default <- function(model, ...) {
 }
 
 
-#' Extract model state at a given year for warm restart
-#'
-#' @param model       An S3 model object
-#' @param sim_output  Full simulation output from \code{run_simulation()}
-#' @param year        Integer, the year at which to extract state
-#' @param ...         Additional arguments
-#'
-#' @return A model state object (model-specific format)
-#' @family model interface
+#' @rdname warm_start
 #' @export
 get_warm_start_state <- function(model, sim_output, year, ...) {
   UseMethod("get_warm_start_state")
@@ -222,16 +302,7 @@ get_warm_start_state.default <- function(model, sim_output, year, ...) {
 }
 
 
-#' Run a simulation from a saved warm-start state
-#'
-#' @param model         An S3 model object
-#' @param warm_state    State object from \code{get_warm_start_state()}
-#' @param params        Model parameters (possibly counterfactual)
-#' @param output_years  Integer vector of years to produce output for
-#' @param ...           Additional arguments
-#'
-#' @return Raw simulation output (same format as \code{run_simulation()})
-#' @family model interface
+#' @rdname warm_start
 #' @export
 run_from_warm_start <- function(model, warm_state, params, output_years, ...) {
   UseMethod("run_from_warm_start")

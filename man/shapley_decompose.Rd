@@ -18,6 +18,7 @@ shapley_decompose(
   step_scenarios = TRUE,
   verbose = TRUE,
   n_cores = 1L,
+  group_vars = character(),
   future_policies = c("off", "on"),
   ...
 )
@@ -64,7 +65,12 @@ time series per decomp year). Default TRUE.}
 
 \item{n_cores}{Integer, number of cores for parallel counterfactual
 simulation runs. Default 1 (sequential). Values > 1 use
-\code{parallel::mclapply()} (Unix/Mac only).}
+\code{parallel::mclapply()}. Windows does not support forking, so there
+it falls back to sequential with a warning.}
+
+\item{group_vars}{Character vector of columns in the output of
+\code{summarize_results()} that identify independent groups, such as
+locations or draws, each decomposed separately. Default none.}
 
 \item{future_policies}{Character, what every factor does AFTER the decomp
 year in each coalition run. \code{"off"} is sequential Shapley as specified
@@ -74,9 +80,8 @@ their observed values, all policies after y are at their counterfactual,
 and only the year-y policy varies across coalitions. The attribution at
 step y is then the marginal impact of the year-y policy conditional on the
 past and undiluted by the future, and \code{sequential_totals()} sums the
-steps into each factor's total impact at every year. This is the default,
-and matches the published pediatric implementation (hiv_decomp
-run_simmod_mean.R). \code{"on"} (the pre-2026-09 behaviour, kept for
+steps into each factor's total impact at every year. This is the
+default. \code{"on"} (the behaviour before version 0.2.0, kept for
 reproducing old runs) leaves a factor that is "on" in a coalition at its
 observed values for ALL years, including after y; its same-year
 attribution equals \code{"off"}'s for any causal model, but its

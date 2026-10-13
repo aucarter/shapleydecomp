@@ -38,21 +38,22 @@ normalize_decomp_method <- function(method) {
 
 #' Run decomposition across locations and decomp years
 #'
-#' Applies \code{decomp_algebra()} to each location × decomp-year group in
-#' the data.
+#' Applies \code{decomp_algebra()} to each group × decomp-year in the data.
 #'
-#' @param data   A \code{data.table} with columns: \code{ihme_loc_id},
-#'   \code{decomp_year}, one column per decomp variable (0/1 indicator), and
-#'   one column per summary variable.
+#' @param data   A \code{data.table} with one column per decomp variable (0/1
+#'   indicator), one column per summary variable, and optionally a
+#'   \code{decomp_year} column and the \code{group_vars} columns.
 #' @param params A list with at least:
 #'   \describe{
 #'     \item{summary_vars}{Character vector of summary variable column names}
 #'     \item{decomp_vars}{Character vector of factor column names (0/1 indicators)}
 #'     \item{decomp_method}{Character, \code{"shapley"} (\code{"das_gupta"}
 #'       accepted as a deprecated alias)}
+#'     \item{group_vars}{Optional character vector of grouping columns,
+#'       such as a location identifier}
 #'   }
 #'
-#' @return A \code{data.table} with one row per location × decomp-year ×
+#' @return A \code{data.table} with one row per group × decomp-year ×
 #'   measure, and one column per factor giving its decomposition effect.
 #' @examples
 #' # Outcomes for every on/off combination of two factors, where the
@@ -64,7 +65,8 @@ normalize_decomp_method <- function(method) {
 #'                     decomp_method = "shapley"))
 #' @export
 run_decomp <- function(data, params) {
-  group_cols <- intersect(c("ihme_loc_id", "decomp_year"), names(data))
+  group_cols <- c(params$group_vars,
+                  intersect("decomp_year", names(data)))
 
   if (length(group_cols) == 0) {
     return(decomp_algebra(data, params))

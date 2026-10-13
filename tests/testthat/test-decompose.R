@@ -206,3 +206,31 @@ test_that("validate_model_interface works for toy model", {
     verbose      = FALSE
   ))
 })
+
+
+test_that("group_vars decomposes each group separately", {
+  # Two locations: the second is the toy model scaled by 3
+  .S3method("run_simulation", "grouped_toy", function(model, params, ...) {
+    one <- run_simulation.toy_model(model, params)
+    rbind(cbind(location = "AAA", one),
+          cbind(location = "BBB", one[, .(year, deaths = 3 * deaths)]))
+  })
+  grouped <- structure(list(years = 1990:2010), class = c("grouped_toy", "toy_model"))
+  args <- list(params = create_toy_params(), factors = c("factor_a", "factor_b"),
+               summary_vars = "deaths", decomp_years = 2000:2005,
+               cf_type = "total_impact", verbose = FALSE)
+
+  res_g <- do.call(shapley_decompose, c(list(model = grouped, group_vars = "location"), args))
+  res_1 <- do.call(shapley_decompose, c(list(model = create_toy_model()), args))
+
+  expect_equal(nrow(res_g$decomp), 2 * nrow(res_1$decomp))
+  aaa <- res_g$decomp[location == "AAA", !"location"]
+  bbb <- res_g$decomp[location == "BBB", !"location"]
+  expect_equal(aaa, res_1$decomp, ignore_attr = TRUE)
+  expect_equal(bbb$factor_a, 3 * res_1$decomp$factor_a)
+
+  tot <- sequential_totals(res_g)
+  expect_true("location" %in% names(tot))
+  expect_equal(tot[location == "AAA", !"location"], sequential_totals(res_1),
+               ignore_attr = TRUE)
+})
