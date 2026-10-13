@@ -1,0 +1,196 @@
+# shapleydecomp
+
+A model-agnostic decomposition framework for discrete-time simulations.
+
+## Installation
+
+``` r
+
+# install.packages("remotes")
+remotes::install_github("aucarter/shapleydecomp")
+```
+
+New to the package? Start with the [Get
+started](https://aucarter.github.io/shapleydecomp/articles/shapleydecomp.html)
+article. The
+[Methods](https://aucarter.github.io/shapleydecomp/articles/methods.html)
+article covers the maths.
+
+## Overview
+
+`shapleydecomp` attributes changes in simulation outcomes to individual
+input factors using **Shapley value decomposition**. Any calibrated
+discrete-time simulation model can use this package by implementing a
+small set of S3 methods.
+
+## Two Counterfactual Types
+
+The package supports two modes of counterfactual analysis:
+
+| Type | `cf_type` | Counterfactual value | Interpretation |
+|----|----|----|----|
+| **Change since** | `"change_since"` | Value at a baseline year | Impact of *changes in the factor since* the baseline year |
+| **Total impact** | `"total_impact"` | Zero / no intervention | *Total* impact of the factor (as if it never existed) |
+
+## Implementing the Interface
+
+To use `shapleydecomp` with your model, create an S3 class and implement
+these **required** methods:
+
+``` r
+
+# 1. Run your simulation with given parameters
+run_simulation.my_model <- function(model, params, ...) { ... }
+
+# 2. Summarize simulation output into a data.table with a 'year' column
+#    plus one column per summary variable (e.g., deaths, infections)
+summarize_results.my_model <- function(model, sim_output, ...) { ... }
+
+# 3. Construct counterfactual parameters for a single factor
+build_counterfactual.my_model <- function(model, params, factor_name,
+                                          decomp_year, cf_type,
+                                          baseline_values, ...) { ... }
+
+# 4. Get the baseline value for a factor
+get_baseline_value.my_model <- function(model, params, factor_name, cf_type,
+                                        baseline_year, ...) { ... }
+```
+
+Methods defined at the top level of a script are found by ordinary S3
+dispatch. Methods defined anywhere else need registering with
+[`.S3method()`](https://rdrr.io/r/base/S3method.html). In a package, put
+`@export` on each method so that `NAMESPACE` declares it with
+`S3method()`.
+
+And these **optional** methods (for performance/setup):
+
+``` r
+
+# One-time preparation before decomp loop (e.g., initial simulation,
+# count-to-percentage conversion)
+prepare_decomp.my_model <- function(model, params, ...) { ... }
+
+# Warm-start support (avoid re-simulating years before decomp year)
+supports_warm_start.my_model <- function(model, ...) { TRUE }
+get_warm_start_state.my_model <- function(model, sim_output, year, ...) { ... }
+run_from_warm_start.my_model <- function(model, warm_state, params,
+                                          output_years, ...) { ... }
+```
+
+## Quick Start
+
+``` r
+
+library(shapleydecomp)
+
+# Create your model object (S3 class with methods above)
+model <- create_my_model(...)
+
+# Run decomposition
+results <- shapley_decompose(
+  model        = model,
+  params       = my_params,
+  factors      = c("treatment_a", "treatment_b", "demographic_x"),
+  summary_vars = c("deaths", "infections"),
+  decomp_years = 2000:2023,
+  method       = "shapley",     # only supported method
+  cf_type      = "change_since" # or "total_impact"
+)
+
+# Results
+results$decomp           # Standard decomposition (factor effects per year)
+results$step_scenarios   # All-on time series per decomp year
+results$extended_decomp  # Extended decomposition (effects at future years)
+results$run_table        # Factorial design table
+```
+
+## Validation
+
+Before running a full decomposition, validate that your model correctly
+implements the interface:
+
+``` r
+
+validate_model_interface(
+  model        = my_model,
+  params       = my_params,
+  factors      = c("factor_a", "factor_b"),
+  summary_vars = c("outcome_1"),
+  baseline_year = 2000
+)
+```
+
+## Decomposition Method
+
+**Shapley value** decomposition weights each factor’s marginal effect by
+`1 / (n × C(n-1, k))`, where `k` is the number of other factors in the
+“on” state, averaging the factor’s contribution over all coalition sizes
+(equivalently, over all factor orderings). This guarantees factor
+effects sum to the total difference between the fully-observed and
+fully-counterfactual scenarios.
+
+Das Gupta’s symmetric standardization is the special case of the Shapley
+value for binary on/off factors and produces identical weights, so
+`method = "das_gupta"` is accepted as a deprecated alias for the same
+Shapley computation.
+
+# Package index
+
+## Run a decomposition
+
+The entry point and its companions.
+
+- [`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md)
+  : Run a full decomposition analysis
+- [`sequential_totals()`](https://aucarter.github.io/shapleydecomp/reference/sequential_totals.md)
+  : Total impact per factor at every year from a sequential
+  decomposition
+- [`validate_model_interface()`](https://aucarter.github.io/shapleydecomp/reference/validate_model_interface.md)
+  : Validate that a model implements the shapleydecomp interface
+- [`CF_CHANGE_SINCE`](https://aucarter.github.io/shapleydecomp/reference/cf_types.md)
+  [`CF_TOTAL_IMPACT`](https://aucarter.github.io/shapleydecomp/reference/cf_types.md)
+  : Counterfactual type constants
+
+## The model interface
+
+S3 generics your model implements. The first four are required; the rest
+are optional and speed things up.
+
+- [`run_simulation()`](https://aucarter.github.io/shapleydecomp/reference/run_simulation.md)
+  : Run a simulation with the given parameters
+- [`summarize_results()`](https://aucarter.github.io/shapleydecomp/reference/summarize_results.md)
+  : Summarize simulation output into a data.table
+- [`get_baseline_value()`](https://aucarter.github.io/shapleydecomp/reference/get_baseline_value.md)
+  : Get the baseline value for a factor
+- [`build_counterfactual()`](https://aucarter.github.io/shapleydecomp/reference/build_counterfactual.md)
+  : Construct counterfactual parameters for a factor
+- [`prepare_decomp()`](https://aucarter.github.io/shapleydecomp/reference/prepare_decomp.md)
+  : Prepare the model for decomposition
+- [`supports_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/supports_warm_start.md)
+  : Check whether a model supports warm starts
+- [`get_warm_start_state()`](https://aucarter.github.io/shapleydecomp/reference/get_warm_start_state.md)
+  : Extract model state at a given year for warm restart
+- [`run_from_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/run_from_warm_start.md)
+  : Run a simulation from a saved warm-start state
+
+## Decomposition algebra
+
+Model-free building blocks. Use them directly if you already have
+outcomes for every on/off combination.
+
+- [`make_run_table()`](https://aucarter.github.io/shapleydecomp/reference/make_run_table.md)
+  : Generate the factorial run table for decomposition
+- [`run_decomp()`](https://aucarter.github.io/shapleydecomp/reference/run_decomp.md)
+  : Run decomposition across locations and decomp years
+- [`decomp_algebra()`](https://aucarter.github.io/shapleydecomp/reference/decomp_algebra.md)
+  : Decompose all summary variables for a single group
+- [`decomp_pair()`](https://aucarter.github.io/shapleydecomp/reference/decomp_pair.md)
+  : Decompose a single summary variable using Shapley value weights
+
+# Articles
+
+### Articles
+
+- [Get
+  started](https://aucarter.github.io/shapleydecomp/articles/shapleydecomp.md):
+- [Methods](https://aucarter.github.io/shapleydecomp/articles/methods.md):
