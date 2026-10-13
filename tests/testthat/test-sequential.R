@@ -19,7 +19,7 @@ create_mem_params <- function() {
 }
 
 # stock_t = 0.7 * stock_{t-1} + a_t + b_t + a_t * b_t ; burden_t = 100 * exp(-stock_t)
-run_simulation.mem_model <<- function(model, params, ...) {
+run_simulation.mem_model <- function(model, params, ...) {
   s <- 0; out <- numeric(length(params$years))
   for (t in seq_along(params$years)) {
     a <- params$a[t]; b <- params$b[t]
@@ -28,14 +28,18 @@ run_simulation.mem_model <<- function(model, params, ...) {
   }
   data.table(year = params$years, burden = out)
 }
-summarize_results.mem_model <<- function(model, sim_output, ...) sim_output
-get_baseline_value.mem_model <<- function(model, params, factor_name, cf_type,
+summarize_results.mem_model <- function(model, sim_output, ...) sim_output
+get_baseline_value.mem_model <- function(model, params, factor_name, cf_type,
                                          baseline_year, ...) list(type = "zero")
-build_counterfactual.mem_model <<- function(model, params, factor_name,
+build_counterfactual.mem_model <- function(model, params, factor_name,
                                            decomp_year, cf_type,
                                            baseline_values, ...) {
   params[[factor_name]][params$years >= decomp_year] <- 0
   params
+}
+for (g in c("run_simulation", "summarize_results", "get_baseline_value",
+            "build_counterfactual")) {
+  .S3method(g, "mem_model", get(paste0(g, ".mem_model")))
 }
 
 run_mem <- function(future) {

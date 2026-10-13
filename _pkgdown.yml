@@ -1,0 +1,63 @@
+url: https://aucarter.github.io/decomposeR/
+
+template:
+  bootstrap: 5
+  bslib:
+    preset: bootstrap
+    primary: "#2c5d8f"
+    base_font: {google: "Source Sans 3"}
+    heading_font: {google: "Source Sans 3"}
+    code_font: {google: "JetBrains Mono"}
+  light-switch: true
+  math-rendering: katex
+
+home:
+  title: "decomposer: Shapley decomposition for discrete-time simulations"
+  sidebar:
+    structure: [links, license, citation, authors, dev]
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github, lightswitch]
+
+reference:
+  - title: Run a decomposition
+    desc: The entry point and its companions.
+    contents:
+      - decompose
+      - sequential_totals
+      - validate_model_interface
+      - cf_types
+  - title: The model interface
+    desc: >
+      S3 generics your model implements. The first four are required; the
+      rest are optional and speed things up.
+    contents:
+      - run_simulation
+      - summarize_results
+      - get_baseline_value
+      - build_counterfactual
+      - prepare_decomp
+      - supports_warm_start
+      - get_warm_start_state
+      - run_from_warm_start
+  - title: Decomposition algebra
+    desc: >
+      Model-free building blocks. Use them directly if you already have
+      outcomes for every on/off combination.
+    contents:
+      - make_run_table
+      - run_decomp
+      - decomp_algebra
+      - decomp_pair
+  - title: internal
+    contents:
+      - decomposer-package
+
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - decomposer
+      - methods

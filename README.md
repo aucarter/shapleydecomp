@@ -1,6 +1,23 @@
 # decomposer
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/aucarter/decomposeR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aucarter/decomposeR/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/aucarter/decomposeR/actions/workflows/pkgdown.yaml/badge.svg)](https://aucarter.github.io/decomposeR/)
+<!-- badges: end -->
+
 A model-agnostic decomposition framework for discrete-time simulations.
+
+## Installation
+
+```r
+# install.packages("remotes")
+remotes::install_github("aucarter/decomposeR")
+```
+
+New to the package? Start with the
+[Get started](https://aucarter.github.io/decomposeR/articles/decomposer.html)
+article. The [Methods](https://aucarter.github.io/decomposeR/articles/methods.html)
+article covers the maths.
 
 ## Overview
 
@@ -40,6 +57,11 @@ build_counterfactual.my_model <- function(model, params, factor_name,
 get_baseline_value.my_model <- function(model, params, factor_name, cf_type,
                                         baseline_year, ...) { ... }
 ```
+
+Methods defined at the top level of a script are found by ordinary S3
+dispatch. Methods defined anywhere else need registering with
+`.S3method()`. In a package, put `@export` on each method so that `NAMESPACE`
+declares it with `S3method()`.
 
 And these **optional** methods (for performance/setup):
 

@@ -1,13 +1,13 @@
 # ============================================================================
 # decomposer: zzz.R
 #
-# Package-level documentation and .onLoad
+# Package-level documentation and imports
 # ============================================================================
 
-#' @importFrom data.table data.table rbindlist setcolorder copy
-NULL
+#' @keywords internal
+#' @import data.table
+#' @importFrom utils getS3method
+"_PACKAGE"
 
-.onLoad <- function(libname, pkgname) {
-  # Ensure data.table is initialized in the package namespace
-  invisible()
-}
+# data.table non-standard evaluation columns
+utils::globalVariables(c("decomp_year", "run_id", "year"))

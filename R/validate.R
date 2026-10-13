@@ -18,6 +18,18 @@
 #' @param verbose        Logical, print diagnostic messages
 #'
 #' @return Invisible TRUE if all checks pass; stops with an error otherwise.
+#' @family model interface
+#' @examples
+#' sir <- new.env()
+#' sys.source(system.file("examples", "sir_model.R", package = "decomposer"),
+#'            envir = sir)
+#' validate_model_interface(
+#'   sir$create_sir_model(),
+#'   sir$create_sir_params(),
+#'   factors       = c("beta_reduction", "treatment_effect"),
+#'   summary_vars  = c("infections", "deaths"),
+#'   baseline_year = 2000
+#' )
 #' @export
 validate_model_interface <- function(model, params = NULL, factors = NULL,
                                      summary_vars = NULL, baseline_year = NULL,

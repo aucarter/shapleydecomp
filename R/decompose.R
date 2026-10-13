@@ -81,6 +81,28 @@
 #'     \item{run_table}{data.table — the factorial design table used.}
 #'     \item{params}{List of decomposition parameters used.}
 #'   }
+#' @seealso \code{vignette("decomposer")} for a worked example, and
+#'   \code{\link{validate_model_interface}} to check a model first.
+#' @examples
+#' # A two-factor SIR model shipped with the package
+#' sir <- new.env()
+#' sys.source(system.file("examples", "sir_model.R", package = "decomposer"),
+#'            envir = sir)
+#' model  <- sir$create_sir_model(years = 1990:2010)
+#' params <- sir$create_sir_params(years = 1990:2010)
+#'
+#' res <- decompose(
+#'   model, params,
+#'   factors      = c("beta_reduction", "treatment_effect"),
+#'   summary_vars = c("infections", "deaths"),
+#'   decomp_years = 2000:2010,
+#'   cf_type      = "total_impact",
+#'   verbose      = FALSE
+#' )
+#' res$decomp
+#'
+#' # Each factor's total impact at every year
+#' sequential_totals(res)
 #' @export
 decompose <- function(model,
                       params,
@@ -156,7 +178,7 @@ decompose <- function(model,
 
   # ---- Main decomposition loop ----
   decomp_by_year <- rbindlist(lapply(decomp_years, function(y) {
-    if (verbose) cat("  decomp_year:", y, "\n")
+    if (verbose) message("  decomp_year: ", y)
 
     warm_start_year <- y - 1L
     output_years    <- seq(y, max(decomp_years))
@@ -285,6 +307,7 @@ decompose <- function(model,
 #'   \code{extended = TRUE} and \code{future_policies = "off"}.
 #' @return data.table with one row per year x measure (and location, if
 #'   present) and one column per factor.
+#' @seealso \code{\link{decompose}}, whose examples call this function.
 #' @export
 sequential_totals <- function(result) {
   if (!identical(result$params$future_policies, "off"))

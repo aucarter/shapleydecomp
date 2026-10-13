@@ -31,10 +31,10 @@ create_toy_params <- function(years = 1990:2010) {
   )
 }
 
-# S3 methods for the toy model — use <<- so they register in .GlobalEnv
-# where S3 method dispatch can find them
+# S3 methods for the toy model, registered below with .S3method() so dispatch
+# finds them without writing to the global environment
 
-run_simulation.toy_model <<- function(model, params, ...) {
+run_simulation.toy_model <- function(model, params, ...) {
   years <- model$years
   data.table(
     year   = years,
@@ -43,11 +43,11 @@ run_simulation.toy_model <<- function(model, params, ...) {
   )
 }
 
-summarize_results.toy_model <<- function(model, sim_output, ...) {
+summarize_results.toy_model <- function(model, sim_output, ...) {
   sim_output
 }
 
-get_baseline_value.toy_model <<- function(model, params, factor_name, cf_type,
+get_baseline_value.toy_model <- function(model, params, factor_name, cf_type,
                                          baseline_year, ...) {
   if (cf_type == CF_TOTAL_IMPACT) {
     return(list(type = "zero"))
@@ -58,7 +58,7 @@ get_baseline_value.toy_model <<- function(model, params, factor_name, cf_type,
   ))
 }
 
-build_counterfactual.toy_model <<- function(model, params, factor_name,
+build_counterfactual.toy_model <- function(model, params, factor_name,
                                            decomp_year, cf_type,
                                            baseline_values, ...) {
   bv <- baseline_values[[factor_name]]
@@ -71,6 +71,11 @@ build_counterfactual.toy_model <<- function(model, params, factor_name,
     params[[factor_name]][idx] <- bv$value
   }
   return(params)
+}
+
+for (g in c("run_simulation", "summarize_results", "get_baseline_value",
+            "build_counterfactual")) {
+  .S3method(g, "toy_model", get(paste0(g, ".toy_model")))
 }
 
 

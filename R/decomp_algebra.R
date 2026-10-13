@@ -54,6 +54,14 @@ normalize_decomp_method <- function(method) {
 #'
 #' @return A \code{data.table} with one row per location × decomp-year ×
 #'   measure, and one column per factor giving its decomposition effect.
+#' @examples
+#' # Outcomes for every on/off combination of two factors, where the
+#' # factors interact: y = 10 + 5a + 3b + 2ab
+#' rt <- make_run_table(c("a", "b"))
+#' rt[, y := 10 + 5 * a + 3 * b + 2 * a * b]
+#' rt[, decomp_year := 2000L]
+#' run_decomp(rt, list(summary_vars = "y", decomp_vars = c("a", "b"),
+#'                     decomp_method = "shapley"))
 #' @export
 run_decomp <- function(data, params) {
   group_cols <- intersect(c("ihme_loc_id", "decomp_year"), names(data))
@@ -75,6 +83,14 @@ run_decomp <- function(data, params) {
 #' @param params Parameter list (see \code{run_decomp}).
 #'
 #' @return A \code{data.table} with one row per summary variable.
+#' @examples
+#' # Outcomes for every on/off combination of two factors, where the
+#' # factors interact: y = 10 + 5a + 3b + 2ab
+#' rt <- make_run_table(c("a", "b"))
+#' rt[, y := 10 + 5 * a + 3 * b + 2 * a * b]
+#' # The interaction term is split evenly: a gets 5 + 1, b gets 3 + 1
+#' decomp_algebra(rt, list(summary_vars = "y", decomp_vars = c("a", "b"),
+#'                         decomp_method = "shapley"))
 #' @export
 decomp_algebra <- function(data, params) {
   dt <- data
@@ -132,6 +148,13 @@ decomp_algebra <- function(data, params) {
 #'
 #' @return A one-row \code{data.frame} with one column per factor (named by
 #'   factor) plus a \code{measure} column.
+#' @examples
+#' # Outcomes for every on/off combination of two factors, where the
+#' # factors interact: y = 10 + 5a + 3b + 2ab
+#' rt <- make_run_table(c("a", "b"))
+#' rt[, y := 10 + 5 * a + 3 * b + 2 * a * b]
+#' decomp_pair(rt, list(decomp_vars = c("a", "b"), decomp_method = "shapley"),
+#'             "y")
 #' @export
 decomp_pair <- function(dt, params, summary_var) {
   path_totals <- dt[[summary_var]]

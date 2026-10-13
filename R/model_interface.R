@@ -29,9 +29,14 @@
 #'     model's notion of "no intervention"). This measures the \emph{total}
 #'     impact of the factor, not just changes since a reference point.
 #' }
+#' @name cf_types
+#' @examples
+#' CF_CHANGE_SINCE
+#' CF_TOTAL_IMPACT
 #' @export
 CF_CHANGE_SINCE <- "change_since"
 
+#' @rdname cf_types
 #' @export
 CF_TOTAL_IMPACT <- "total_impact"
 
@@ -52,6 +57,7 @@ CF_TOTAL_IMPACT <- "total_impact"
 #'
 #' @return Raw simulation output (model-specific format). Will be passed to
 #'   \code{summarize_results()}.
+#' @family model interface
 #' @export
 run_simulation <- function(model, params, ...) {
 
@@ -71,6 +77,7 @@ run_simulation <- function(model, params, ...) {
 #'
 #' @return A \code{data.table} with columns: \code{year}, plus one column per
 #'   summary variable (e.g., \code{deaths}, \code{infections}).
+#' @family model interface
 #' @export
 summarize_results <- function(model, sim_output, ...) {
   UseMethod("summarize_results")
@@ -95,6 +102,7 @@ summarize_results <- function(model, sim_output, ...) {
 #'
 #' @return Modified model parameters with the factor set to its counterfactual
 #'   value.
+#' @family model interface
 #' @export
 build_counterfactual <- function(model, params, factor_name, decomp_year,
                                  cf_type, baseline_values, ...) {
@@ -117,6 +125,7 @@ build_counterfactual <- function(model, params, factor_name, decomp_year,
 #' @param ...       Additional arguments
 #'
 #' @return The baseline value for the factor (format is model-specific).
+#' @family model interface
 #' @export
 get_baseline_value <- function(model, params, factor_name, cf_type,
                                baseline_year, ...) {
@@ -146,6 +155,7 @@ get_baseline_value <- function(model, params, factor_name, cf_type,
 #'   \item{full_sim}{Optional: output of a full (observed) simulation, used
 #'     for warm starts and as the "all-on" reference}
 #'   \item{full_summary}{Optional: summary of the full simulation}
+#' @family model interface
 #' @export
 prepare_decomp <- function(model, params, ...) {
   UseMethod("prepare_decomp")
@@ -176,6 +186,7 @@ prepare_decomp.default <- function(model, params, ...) {
 #' @param ...    Additional arguments
 #'
 #' @return Logical
+#' @family model interface
 #' @export
 supports_warm_start <- function(model, ...) {
   UseMethod("supports_warm_start")
@@ -195,6 +206,7 @@ supports_warm_start.default <- function(model, ...) {
 #' @param ...         Additional arguments
 #'
 #' @return A model state object (model-specific format)
+#' @family model interface
 #' @export
 get_warm_start_state <- function(model, sim_output, year, ...) {
   UseMethod("get_warm_start_state")
@@ -219,6 +231,7 @@ get_warm_start_state.default <- function(model, sim_output, year, ...) {
 #' @param ...           Additional arguments
 #'
 #' @return Raw simulation output (same format as \code{run_simulation()})
+#' @family model interface
 #' @export
 run_from_warm_start <- function(model, warm_state, params, output_years, ...) {
   UseMethod("run_from_warm_start")

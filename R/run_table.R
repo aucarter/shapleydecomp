@@ -18,6 +18,8 @@
 #'
 #' @return A \code{data.table} with columns: \code{run_id} (integer), and one
 #'   column per factor with values in \code{decomp_scalar:1}.
+#' @examples
+#' make_run_table(c("treatment", "prevention", "demography"))
 #' @export
 make_run_table <- function(factors, decomp_scalar = 0) {
   run_table <- data.table::data.table(
@@ -30,5 +32,5 @@ make_run_table <- function(factors, decomp_scalar = 0) {
   data.table::setcolorder(
     run_table, c(ncol(run_table), seq_len(ncol(run_table) - 1))
   )
-  return(run_table)
+  run_table[]
 }

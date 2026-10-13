@@ -1,0 +1,12 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^manuscript$
+^scratch$
+^CRAN-ROADMAP\.md$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^README\.Rmd$
