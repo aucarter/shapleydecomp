@@ -64,8 +64,10 @@ time series per decomp year). Default TRUE.}
 \item{verbose}{Logical, print progress messages. Default TRUE.}
 
 \item{n_cores}{Integer, number of cores for parallel counterfactual
-simulation runs. Default 1 (sequential). Values > 1 use
-\code{parallel::mclapply()}. Windows does not support forking, so there
+simulation runs. Default 1 (sequential). Values > 1 run every
+counterfactual simulation, across all decomp years, in one
+\code{parallel::mclapply()} map, so that more cores than the 2^n runs of
+a single year can be used. Windows does not support forking, so there
 it falls back to sequential with a warning.}
 
 \item{group_vars}{Character vector of columns in the output of

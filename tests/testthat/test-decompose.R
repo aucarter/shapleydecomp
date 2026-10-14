@@ -234,3 +234,18 @@ test_that("group_vars decomposes each group separately", {
   expect_equal(tot[location == "AAA", !"location"], sequential_totals(res_1),
                ignore_attr = TRUE)
 })
+
+
+test_that("a model returning a plain data.frame works like one returning data.table", {
+  .S3method("summarize_results", "df_toy", function(model, sim_output, ...) {
+    as.data.frame(sim_output)
+  })
+  df_model <- structure(list(years = 1990:2010), class = c("df_toy", "toy_model"))
+  args <- list(params = create_toy_params(), factors = c("factor_a", "factor_b"),
+               summary_vars = "deaths", decomp_years = 2000:2005,
+               cf_type = "change_since", verbose = FALSE)
+  res_df <- do.call(shapley_decompose, c(list(model = df_model), args))
+  res_dt <- do.call(shapley_decompose, c(list(model = create_toy_model()), args))
+  expect_equal(res_df$decomp, res_dt$decomp)
+  expect_equal(res_df$extended_decomp, res_dt$extended_decomp)
+})

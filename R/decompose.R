@@ -67,8 +67,10 @@
 #'   \code{summarize_results()} that identify independent groups, such as
 #'   locations or draws, each decomposed separately. Default none.
 #' @param n_cores        Integer, number of cores for parallel counterfactual
-#'   simulation runs. Default 1 (sequential). Values > 1 use
-#'   \code{parallel::mclapply()}. Windows does not support forking, so there
+#'   simulation runs. Default 1 (sequential). Values > 1 run every
+#'   counterfactual simulation, across all decomp years, in one
+#'   \code{parallel::mclapply()} map, so that more cores than the 2^n runs of
+#'   a single year can be used. Windows does not support forking, so there
 #'   it falls back to sequential with a warning.
 #' @param ...            Additional arguments passed to model methods.
 #'
@@ -170,7 +172,10 @@ shapley_decompose <- function(model,
   model        <- prep$model
   params       <- prep$params
   full_sim     <- prep$full_sim
-  full_summary <- prep$full_summary
+  # Models may return any data.frame; work with data.table from here on
+  full_summary <- if (!is.null(prep$full_summary)) {
+    as.data.table(prep$full_summary)
+  }
 
   use_warm_start <- supports_warm_start(model, ...)
 
@@ -183,120 +188,140 @@ shapley_decompose <- function(model,
     )
   }
 
-  # ---- Accumulators ----
-  step_list       <- list()
-  ext_decomp_list <- list()
+  # ---- Plan every coalition run ----
+  # All |decomp_years| x 2^n runs depend only on the observed params, so they
+  # are mapped in one pass (one parallel map when n_cores > 1).
+  # Under future_policies = "off" the all-off run at step y (counterfactual
+  # from y) is the same scenario as the all-on run at step y - 1, so it is
+  # not simulated again but copied from that run below.
+  # Under "on" the all-on run is the observed run, already in full_summary.
+  tasks <- CJ(decomp_year = decomp_years, run_id = run_table$run_id,
+              sorted = FALSE)
+  tasks[, how := "simulate"]
+  if (future_policies == "off") {
+    tasks[run_id == all_off_id & (decomp_year - 1L) %in% decomp_years,
+          how := "previous_all_on"]
+  } else if (!is.null(full_summary)) {
+    tasks[run_id == all_on_id, how := "observed"]
+  }
+  to_run <- tasks[how == "simulate"]
 
-  # ---- Main decomposition loop ----
-  decomp_by_year <- rbindlist(lapply(decomp_years, function(y) {
-    if (verbose) message("  decomp_year: ", y)
+  if (verbose) {
+    message(sprintf("Running %d simulations (%d reused)...",
+                    nrow(to_run), nrow(tasks) - nrow(to_run)))
+  }
 
-    warm_start_year <- y - 1L
-    output_years    <- seq(y, max(decomp_years))
-
-    # Run all counterfactual combinations for this decomp year
-    run_one_cf <- function(run_id) {
-      run_spec <- unlist(as.list(run_table[run_id, factors, with = FALSE]))
-
-      # All-on case: use the pre-computed full simulation. Under
-      # future_policies = "off" all-on still has every policy off after y, so
-      # it is not the realised run and must be simulated.
-      if (all(run_spec == 1) && !is.null(full_summary) &&
-          future_policies == "on") {
-        return(list(summary = full_summary[year %in% output_years]))
-      }
-
-      # Build counterfactual parameters
-      params_cf <- params
-      if (future_policies == "off") {
-        # Every factor to its counterfactual from y + 1: the future is off in
-        # every coalition, so only the year-y policy varies below.
-        for (fname in factors) {
-          params_cf <- build_counterfactual(
-            model, params_cf, fname, y + 1L, cf_type, baseline_values, ...
-          )
-        }
-      }
-      for (fname in names(run_spec[run_spec == 0])) {
-        params_cf <- build_counterfactual(
-          model, params_cf, fname, y, cf_type, baseline_values, ...
+  # Parameters with every factor at its counterfactual from y + 1. Identical
+  # for every coalition at step y, so each process builds them once per year.
+  future_off <- new.env()
+  future_off_params <- function(y) {
+    if (!identical(future_off$year, y)) {
+      p <- params
+      for (fname in factors) {
+        p <- build_counterfactual(
+          model, p, fname, y + 1L, cf_type, baseline_values, ...
         )
       }
+      future_off$year   <- y
+      future_off$params <- p
+    }
+    future_off$params
+  }
 
-      # Run simulation (warm start or full)
-      if (use_warm_start && !is.null(full_sim)) {
-        sim_cf <- run_from_warm_start(
-          model, full_sim, params_cf, output_years,
-          warm_start_year = warm_start_year, ...
-        )
-      } else {
-        sim_cf <- run_simulation(model, params_cf, ...)
-      }
+  run_one_cf <- function(task) {
+    y      <- to_run$decomp_year[task]
+    rid    <- to_run$run_id[task]
+    off    <- factors[unlist(run_table[rid, factors, with = FALSE]) == 0]
+    output_years <- seq(y, max(decomp_years))
 
-      summary_cf <- summarize_results(model, sim_cf, ...)
-      if ("year" %in% names(summary_cf)) {
-        summary_cf <- summary_cf[year %in% output_years]
-      }
-
-      return(list(summary = summary_cf))
+    params_cf <- if (future_policies == "off") future_off_params(y) else params
+    for (fname in off) {
+      params_cf <- build_counterfactual(
+        model, params_cf, fname, y, cf_type, baseline_values, ...
+      )
     }
 
-    if (n_cores > 1L) {
-      year_sims <- parallel::mclapply(
-        run_table$run_id, run_one_cf, mc.cores = n_cores
+    if (use_warm_start && !is.null(full_sim)) {
+      sim_cf <- run_from_warm_start(
+        model, full_sim, params_cf, output_years,
+        warm_start_year = y - 1L, ...
       )
     } else {
-      year_sims <- lapply(run_table$run_id, run_one_cf)
+      sim_cf <- run_simulation(model, params_cf, ...)
     }
 
-    # ---- Build summary table ----
-    summary_dt <- rbindlist(lapply(seq_along(year_sims), function(r) {
-      dt <- year_sims[[r]]$summary
-      dt$run_id <- run_table$run_id[r]
-      return(dt)
+    summary_cf <- as.data.table(summarize_results(model, sim_cf, ...))
+    summary_cf[year %in% output_years]
+  }
+
+  if (n_cores > 1L) {
+    sims <- parallel::mclapply(seq_len(nrow(to_run)), run_one_cf,
+                               mc.cores = n_cores)
+  } else {
+    sims <- lapply(seq_len(nrow(to_run)), run_one_cf)
+  }
+  failed <- which(vapply(sims, inherits, logical(1), what = "try-error"))
+  if (length(failed) > 0) {
+    stop(sprintf("Simulation failed for decomp_year %d, run_id %d: %s",
+                 to_run$decomp_year[failed[1]], to_run$run_id[failed[1]],
+                 conditionMessage(attr(sims[[failed[1]]], "condition"))),
+         call. = FALSE)
+  }
+  sim_key <- paste(to_run$decomp_year, to_run$run_id)
+  get_sim <- function(y, rid) sims[[match(paste(y, rid), sim_key)]]
+
+  # ---- Decompose each step ----
+  steps <- lapply(decomp_years, function(y) {
+    if (verbose) message("  decomp_year: ", y)
+    output_years <- seq(y, max(decomp_years))
+
+    year_tasks <- tasks[decomp_year == y]
+    summary_dt <- rbindlist(lapply(seq_len(nrow(year_tasks)), function(r) {
+      rid <- year_tasks$run_id[r]
+      s <- switch(year_tasks$how[r],
+        simulate        = get_sim(y, rid),
+        previous_all_on = get_sim(y - 1L, all_on_id)[year %in% output_years],
+        observed        = full_summary[year %in% output_years]
+      )
+      cbind(run_id = rid, s)
     }))
     summary_dt <- merge(run_table, summary_dt, by = "run_id")
     summary_dt[, decomp_year := y]
+    sv_cols <- intersect(summary_vars, names(summary_dt))
 
-    # ---- Step scenarios ----
+    out <- list(decomp = run_decomp(summary_dt[year == y], decomp_params))
+
     if (step_scenarios) {
-      sv_cols <- intersect(summary_vars, names(summary_dt))
       step_cols <- c(group_vars, "year", sv_cols)
-
-      step_list[[as.character(y)]] <<- cbind(
+      out$step <- cbind(
         data.table(step_year = y),
         summary_dt[run_id == all_on_id, step_cols, with = FALSE]
       )
-
-      # Also save counterfactual baseline from the first decomp year
+      # The counterfactual baseline: all factors off from the first decomp year
       if (y == decomp_years[1]) {
-        step_list[[as.character(decomp_years[1] - 1L)]] <<- cbind(
-          data.table(step_year = decomp_years[1] - 1L),
-          summary_dt[run_id == all_off_id, step_cols, with = FALSE]
+        out$step <- rbind(
+          cbind(data.table(step_year = y - 1L),
+                summary_dt[run_id == all_off_id, step_cols, with = FALSE]),
+          out$step
         )
       }
     }
 
-    # ---- Extended factor decomposition ----
     if (extended) {
-      ext_group <- c(group_vars, "year")
-      ext <- shapley_values(summary_dt[year >= y], factors,
-                            intersect(summary_vars, names(summary_dt)),
-                            by = ext_group)
-      ext[, decomp_year := y]
-      ext_decomp_list[[as.character(y)]] <<- ext
+      out$ext <- shapley_values(summary_dt[year >= y], factors, sv_cols,
+                                by = c(group_vars, "year"))
+      out$ext[, decomp_year := y]
     }
+    out
+  })
 
-    # ---- Standard decomposition at the decomp year ----
-    year_decomp <- run_decomp(summary_dt[year == y], decomp_params)
-    return(year_decomp)
-  }))
+  collect <- function(part) rbindlist(lapply(steps, `[[`, part))
 
   # ---- Assemble outputs ----
   result <- list(
-    decomp          = decomp_by_year,
-    step_scenarios  = if (step_scenarios) rbindlist(step_list) else NULL,
-    extended_decomp = if (extended) rbindlist(ext_decomp_list) else NULL,
+    decomp          = collect("decomp"),
+    step_scenarios  = if (step_scenarios) collect("step") else NULL,
+    extended_decomp = if (extended) collect("ext") else NULL,
     run_table       = run_table,
     params          = decomp_params
   )

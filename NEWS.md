@@ -21,6 +21,20 @@
   groups, years and measures (#8). With 200 draws as groups, a full
   `shapley_decompose()` run is 5-7x faster and the decomposition step alone
   about 130x faster, with results identical to rounding.
+* `shapley_decompose()` does less work for the same result (#9):
+  - all counterfactual runs, across all decomp years, go through one
+    parallel map, so a decomposition is no longer limited to 2^n cores at a
+    time or held up by the slowest run of each year;
+  - with `future_policies = "off"`, the all-off run at step y is reused from
+    the all-on run at step y - 1 rather than simulated again (one run fewer
+    per contiguous year);
+  - the "every factor off from y + 1" parameters are built once per year
+    (per worker) rather than once per run.
+  Outputs are identical to the previous version.
+* A failed simulation inside `n_cores > 1` now stops with the decomp year and
+  run that failed, instead of a later, unrelated-looking error.
+* `summarize_results()` (and `prepare_decomp()`'s `full_summary`) may return
+  any data.frame. It is converted to a `data.table` on the way in (#6).
 * `run_decomp()`, `decomp_algebra()` and `decomp_pair()` match rows to on/off
   combinations by their factor values, so row order no longer matters (#7).
   Incomplete or duplicated combinations, or factor values other than 0/1,

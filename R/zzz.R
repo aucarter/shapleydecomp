@@ -10,4 +10,4 @@
 "_PACKAGE"
 
 # data.table non-standard evaluation columns
-utils::globalVariables(c("decomp_year", "run_id", "year", "i", "g"))
+utils::globalVariables(c("decomp_year", "run_id", "year", "i", "g", "how"))
