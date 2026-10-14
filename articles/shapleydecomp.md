@@ -171,7 +171,7 @@ res <- shapley_decompose(
 )
 names(res)
 #> [1] "decomp"          "step_scenarios"  "extended_decomp" "run_table"      
-#> [5] "params"
+#> [5] "run_summary"     "params"
 head(res$decomp)
 #>    decomp_year    measure beta_reduction treatment_effect
 #>          <int>     <char>          <num>            <num>
@@ -237,7 +237,7 @@ obs <- run_simulation(model, params)[, .(year, observed = infections)]
 chk <- merge(merge(inf, obs, by = "year"), off, by = "year")
 chk[, gap := beta_reduction + treatment_effect - (observed - infections)]
 max(abs(chk$gap))
-#> [1] 2.842171e-14
+#> [1] 1.136868e-13
 ```
 
 ## 5. Two questions, two counterfactuals
@@ -275,10 +275,10 @@ attributed.
 ## 6. Going further
 
 - **Speed.** Implement
-  [`supports_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/supports_warm_start.md),
-  [`get_warm_start_state()`](https://aucarter.github.io/shapleydecomp/reference/get_warm_start_state.md)
+  [`supports_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/warm_start.md),
+  [`get_warm_start_state()`](https://aucarter.github.io/shapleydecomp/reference/warm_start.md)
   and
-  [`run_from_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/run_from_warm_start.md),
+  [`run_from_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/warm_start.md),
   and each counterfactual restarts from the observed state the year
   before the decomposition year instead of from the start of the
   simulation. On Unix, `n_cores` runs the counterfactuals for a year in

@@ -24,8 +24,8 @@ sequential_totals(result)
 
 ## Value
 
-data.table with one row per year x measure (and location, if present)
-and one column per factor.
+data.table with one row per group x year x measure and one column per
+factor.
 
 ## See also
 

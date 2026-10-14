@@ -22,6 +22,7 @@ shapley_decompose(
   step_scenarios = TRUE,
   verbose = TRUE,
   n_cores = 1L,
+  group_vars = character(),
   future_policies = c("off", "on"),
   ...
 )
@@ -96,9 +97,19 @@ shapley_decompose(
 - n_cores:
 
   Integer, number of cores for parallel counterfactual simulation runs.
-  Default 1 (sequential). Values \> 1 use
+  Default 1 (sequential). Values \> 1 run every counterfactual
+  simulation, across all decomp years, in one
   [`parallel::mclapply()`](https://rdrr.io/r/parallel/mclapply.html)
-  (Unix/Mac only).
+  map, so that more cores than the 2^n runs of a single year can be
+  used. Windows does not support forking, so there it falls back to
+  sequential with a warning.
+
+- group_vars:
+
+  Character vector of columns in the output of
+  [`summarize_results()`](https://aucarter.github.io/shapleydecomp/reference/summarize_results.md)
+  that identify independent groups, such as locations or draws, each
+  decomposed separately. Default none.
 
 - future_policies:
 
@@ -112,11 +123,10 @@ shapley_decompose(
   policy conditional on the past and undiluted by the future, and
   [`sequential_totals()`](https://aucarter.github.io/shapleydecomp/reference/sequential_totals.md)
   sums the steps into each factor's total impact at every year. This is
-  the default, and matches the published pediatric implementation
-  (hiv_decomp run_simmod_mean.R). `"on"` (the pre-2026-09 behaviour,
-  kept for reproducing old runs) leaves a factor that is "on" in a
-  coalition at its observed values for ALL years, including after y; its
-  same-year attribution equals `"off"`'s for any causal model, but its
+  the default. `"on"` (the behaviour before version 0.2.0, kept for
+  reproducing old runs) leaves a factor that is "on" in a coalition at
+  its observed values for ALL years, including after y; its same-year
+  attribution equals `"off"`'s for any causal model, but its
   `extended_decomp` rows (year \> decomp year) include future policies
   and must not be summed across steps.
 
@@ -146,6 +156,13 @@ A list with components:
 - run_table:
 
   data.table — the factorial design table used.
+
+- run_summary:
+
+  data.table — per decomp year: the number of coalition runs, how many
+  were simulated, how many were reused from the previous step, and the
+  factors that were null players (their counterfactual left the params
+  unchanged, so their effect is 0).
 
 - params:
 
@@ -208,28 +225,28 @@ res$decomp
 sequential_totals(res)
 #>      year    measure beta_reduction treatment_effect
 #>     <int>     <char>          <num>            <num>
-#>  1:  2000 infections    -1.98482865       0.00000000
-#>  2:  2000     deaths     0.00000000       0.00000000
-#>  3:  2001 infections    -2.86518904      -0.59540721
-#>  4:  2001     deaths    -0.01984829      -0.01985836
-#>  5:  2002 infections    -3.92622649      -1.38933545
-#>  6:  2002     deaths    -0.04631687      -0.04634348
-#>  7:  2003 infections    -5.18837081      -2.41406979
-#>  8:  2003     deaths    -0.08048428      -0.08053602
-#>  9:  2004 infections    -6.67529001      -3.70442608
-#> 10:  2004     deaths    -0.12351471      -0.12360265
-#> 11:  2005 infections    -8.41539243      -5.29842191
-#> 12:  2005     deaths    -0.17668099      -0.17681905
-#> 13:  2006 infections   -10.44361487      -7.23831458
-#> 14:  2006     deaths    -0.24140001      -0.24160541
-#> 15:  2007 infections   -12.80345595      -9.57204736
-#> 16:  2007     deaths    -0.31928216      -0.31957593
-#> 17:  2008 infections   -15.54920984     -12.35512650
-#> 18:  2008     deaths    -0.41219568      -0.41260332
-#> 19:  2009 infections   -18.74836125     -15.65293347
-#> 20:  2009     deaths    -0.52234625      -0.52289856
-#> 21:  2010 infections   -22.48411708     -19.54346075
-#> 22:  2010     deaths    -0.65237178      -0.65310591
+#>  1:  2000 infections    -1.98482865     4.440892e-16
+#>  2:  2000     deaths     0.00000000     0.000000e+00
+#>  3:  2001 infections    -2.86518904    -5.954072e-01
+#>  4:  2001     deaths    -0.01984829    -1.985836e-02
+#>  5:  2002 infections    -3.92622649    -1.389335e+00
+#>  6:  2002     deaths    -0.04631687    -4.634348e-02
+#>  7:  2003 infections    -5.18837081    -2.414070e+00
+#>  8:  2003     deaths    -0.08048428    -8.053602e-02
+#>  9:  2004 infections    -6.67529001    -3.704426e+00
+#> 10:  2004     deaths    -0.12351471    -1.236027e-01
+#> 11:  2005 infections    -8.41539243    -5.298422e+00
+#> 12:  2005     deaths    -0.17668099    -1.768191e-01
+#> 13:  2006 infections   -10.44361487    -7.238315e+00
+#> 14:  2006     deaths    -0.24140001    -2.416054e-01
+#> 15:  2007 infections   -12.80345595    -9.572047e+00
+#> 16:  2007     deaths    -0.31928216    -3.195759e-01
+#> 17:  2008 infections   -15.54920984    -1.235513e+01
+#> 18:  2008     deaths    -0.41219568    -4.126033e-01
+#> 19:  2009 infections   -18.74836125    -1.565293e+01
+#> 20:  2009     deaths    -0.52234625    -5.228986e-01
+#> 21:  2010 infections   -22.48411708    -1.954346e+01
+#> 22:  2010     deaths    -0.65237178    -6.531059e-01
 #>      year    measure beta_reduction treatment_effect
 #>     <int>     <char>          <num>            <num>
 ```

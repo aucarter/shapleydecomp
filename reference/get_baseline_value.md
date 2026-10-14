@@ -44,10 +44,8 @@ The baseline value for the factor (format is model-specific).
 
 Other model interface:
 [`build_counterfactual()`](https://aucarter.github.io/shapleydecomp/reference/build_counterfactual.md),
-[`get_warm_start_state()`](https://aucarter.github.io/shapleydecomp/reference/get_warm_start_state.md),
 [`prepare_decomp()`](https://aucarter.github.io/shapleydecomp/reference/prepare_decomp.md),
-[`run_from_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/run_from_warm_start.md),
 [`run_simulation()`](https://aucarter.github.io/shapleydecomp/reference/run_simulation.md),
 [`summarize_results()`](https://aucarter.github.io/shapleydecomp/reference/summarize_results.md),
-[`supports_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/supports_warm_start.md),
-[`validate_model_interface()`](https://aucarter.github.io/shapleydecomp/reference/validate_model_interface.md)
+[`validate_model_interface()`](https://aucarter.github.io/shapleydecomp/reference/validate_model_interface.md),
+[`warm_start`](https://aucarter.github.io/shapleydecomp/reference/warm_start.md)

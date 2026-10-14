@@ -70,6 +70,7 @@ of the specified factors across all decomposition years.</p>
 <span>  step_scenarios <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  group_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  future_policies <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"off"</span>, <span class="st">"on"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -144,8 +145,17 @@ time series per decomp year). Default TRUE.</p></dd>
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
 <dd><p>Integer, number of cores for parallel counterfactual
-simulation runs. Default 1 (sequential). Values &gt; 1 use
-<code><a href="https://rdrr.io/r/parallel/mclapply.html" class="external-link">parallel::mclapply()</a></code> (Unix/Mac only).</p></dd>
+simulation runs. Default 1 (sequential). Values &gt; 1 run every
+counterfactual simulation, across all decomp years, in one
+<code><a href="https://rdrr.io/r/parallel/mclapply.html" class="external-link">parallel::mclapply()</a></code> map, so that more cores than the 2^n runs of
+a single year can be used. Windows does not support forking, so there
+it falls back to sequential with a warning.</p></dd>
+
+
+<dt id="arg-group-vars">group_vars<a class="anchor" aria-label="anchor" href="#arg-group-vars"></a></dt>
+<dd><p>Character vector of columns in the output of
+<code><a href="summarize_results.html">summarize_results()</a></code> that identify independent groups, such as
+locations or draws, each decomposed separately. Default none.</p></dd>
 
 
 <dt id="arg-future-policies">future_policies<a class="anchor" aria-label="anchor" href="#arg-future-policies"></a></dt>
@@ -157,9 +167,8 @@ their observed values, all policies after y are at their counterfactual,
 and only the year-y policy varies across coalitions. The attribution at
 step y is then the marginal impact of the year-y policy conditional on the
 past and undiluted by the future, and <code><a href="sequential_totals.html">sequential_totals()</a></code> sums the
-steps into each factor's total impact at every year. This is the default,
-and matches the published pediatric implementation (hiv_decomp
-run_simmod_mean.R). <code>"on"</code> (the pre-2026-09 behaviour, kept for
+steps into each factor's total impact at every year. This is the
+default. <code>"on"</code> (the behaviour before version 0.2.0, kept for
 reproducing old runs) leaves a factor that is "on" in a coalition at its
 observed values for ALL years, including after y; its same-year
 attribution equals <code>"off"</code>'s for any causal model, but its
@@ -188,6 +197,12 @@ effects at all years &gt;= decomp year). NULL if <code>extended = FALSE</code>.<
 
 <dt>run_table</dt>
 <dd><p>data.table — the factorial design table used.</p></dd>
+
+<dt>run_summary</dt>
+<dd><p>data.table — per decomp year: the number of
+coalition runs, how many were simulated, how many were reused from
+the previous step, and the factors that were null players (their
+counterfactual left the params unchanged, so their effect is 0).</p></dd>
 
 <dt>params</dt>
 <dd><p>List of decomposition parameters used.</p></dd>
@@ -249,28 +264,28 @@ effects at all years &gt;= decomp year). NULL if <code>extended = FALSE</code>.<
 <span class="r-in"><span><span class="fu"><a href="sequential_totals.html">sequential_totals</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      year    measure beta_reduction treatment_effect</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;int&gt;     &lt;char&gt;          &lt;num&gt;            &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:  2000 infections    -1.98482865       0.00000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:  2000     deaths     0.00000000       0.00000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:  2001 infections    -2.86518904      -0.59540721</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:  2001     deaths    -0.01984829      -0.01985836</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:  2002 infections    -3.92622649      -1.38933545</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:  2002     deaths    -0.04631687      -0.04634348</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:  2003 infections    -5.18837081      -2.41406979</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:  2003     deaths    -0.08048428      -0.08053602</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:  2004 infections    -6.67529001      -3.70442608</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:  2004     deaths    -0.12351471      -0.12360265</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:  2005 infections    -8.41539243      -5.29842191</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:  2005     deaths    -0.17668099      -0.17681905</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:  2006 infections   -10.44361487      -7.23831458</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:  2006     deaths    -0.24140001      -0.24160541</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:  2007 infections   -12.80345595      -9.57204736</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:  2007     deaths    -0.31928216      -0.31957593</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:  2008 infections   -15.54920984     -12.35512650</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:  2008     deaths    -0.41219568      -0.41260332</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:  2009 infections   -18.74836125     -15.65293347</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:  2009     deaths    -0.52234625      -0.52289856</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:  2010 infections   -22.48411708     -19.54346075</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22:  2010     deaths    -0.65237178      -0.65310591</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:  2000 infections    -1.98482865     4.440892e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:  2000     deaths     0.00000000     0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:  2001 infections    -2.86518904    -5.954072e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:  2001     deaths    -0.01984829    -1.985836e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:  2002 infections    -3.92622649    -1.389335e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:  2002     deaths    -0.04631687    -4.634348e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:  2003 infections    -5.18837081    -2.414070e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:  2003     deaths    -0.08048428    -8.053602e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:  2004 infections    -6.67529001    -3.704426e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:  2004     deaths    -0.12351471    -1.236027e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:  2005 infections    -8.41539243    -5.298422e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:  2005     deaths    -0.17668099    -1.768191e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:  2006 infections   -10.44361487    -7.238315e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:  2006     deaths    -0.24140001    -2.416054e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:  2007 infections   -12.80345595    -9.572047e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:  2007     deaths    -0.31928216    -3.195759e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:  2008 infections   -15.54920984    -1.235513e+01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:  2008     deaths    -0.41219568    -4.126033e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:  2009 infections   -18.74836125    -1.565293e+01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:  2009     deaths    -0.52234625    -5.228986e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21:  2010 infections   -22.48411708    -1.954346e+01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22:  2010     deaths    -0.65237178    -6.531059e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      year    measure beta_reduction treatment_effect</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;int&gt;     &lt;char&gt;          &lt;num&gt;            &lt;num&gt;</span>
 </code></pre></div>

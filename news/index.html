@@ -49,6 +49,25 @@
 <li>
 <code><a href="https://rdrr.io/r/stats/decompose.html" class="external-link">decompose()</a></code> is renamed <code><a href="../reference/shapley_decompose.html">shapley_decompose()</a></code>, so it no longer masks <code><a href="https://rdrr.io/r/stats/decompose.html" class="external-link">stats::decompose()</a></code>. The arguments and return value are unchanged.</li>
 <li>All exported functions are documented with examples. There are two new vignettes, <em>Get started</em> and <em>Methods</em>, and a pkgdown site.</li>
+<li>New <code>group_vars</code> argument to <code><a href="../reference/shapley_decompose.html">shapley_decompose()</a></code> (and <code>group_vars</code> in <code><a href="../reference/run_decomp.html">run_decomp()</a></code> params) names the columns, such as a location, that identify independent groups. It replaces the hard-coded <code>ihme_loc_id</code> grouping.</li>
+<li>The warm-start methods are documented together under <code><a href="../reference/warm_start.html">?warm_start</a></code>, with a runnable example. The documentation now describes the actual contract: <code><a href="../reference/warm_start.html">run_from_warm_start()</a></code> receives the observed simulation and <code>warm_start_year</code>.</li>
+<li>
+<code>n_cores &gt; 1</code> on Windows falls back to sequential with a warning instead of failing.</li>
+<li>The Shapley algebra is now a single weight-matrix product over all groups, years and measures (<a href="https://github.com/aucarter/shapleydecomp/issues/8" class="external-link">#8</a>). With 200 draws as groups, a full <code><a href="../reference/shapley_decompose.html">shapley_decompose()</a></code> run is 5-7x faster and the decomposition step alone about 130x faster, with results identical to rounding.</li>
+<li>
+<code><a href="../reference/shapley_decompose.html">shapley_decompose()</a></code> does less work for the same result (<a href="https://github.com/aucarter/shapleydecomp/issues/9" class="external-link">#9</a>):
+<ul><li>all counterfactual runs, across all decomp years, go through one parallel map, so a decomposition is no longer limited to 2^n cores at a time or held up by the slowest run of each year;</li>
+<li>with <code>future_policies = "off"</code>, the all-off run at step y is reused from the all-on run at step y - 1 rather than simulated again (one run fewer per contiguous year);</li>
+<li>the “every factor off from y + 1” parameters are built once per year (per worker) rather than once per run. Outputs are identical to the previous version.</li>
+</ul></li>
+<li>Factors whose counterfactual leaves a step’s parameters unchanged, such as a programme that has not started yet, are detected as null players. Their effect at that step is 0, and coalitions that differ only in null factors are simulated once (<a href="https://github.com/aucarter/shapleydecomp/issues/10" class="external-link">#10</a>). A run is reused only after confirming its parameters are <code><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical()</a></code>, so a model whose counterfactuals interact loses the saving, never correctness. The new <code>run_summary</code> output reports, per decomp year, the runs simulated and reused and the null factors.</li>
+<li>A failed simulation inside <code>n_cores &gt; 1</code> now stops with the decomp year and run that failed, instead of a later, unrelated-looking error.</li>
+<li>
+<code><a href="../reference/summarize_results.html">summarize_results()</a></code> (and <code><a href="../reference/prepare_decomp.html">prepare_decomp()</a></code>’s <code>full_summary</code>) may return any data.frame. It is converted to a <code>data.table</code> on the way in (<a href="https://github.com/aucarter/shapleydecomp/issues/6" class="external-link">#6</a>).</li>
+<li>
+<code><a href="../reference/run_decomp.html">run_decomp()</a></code>, <code><a href="../reference/decomp_algebra.html">decomp_algebra()</a></code> and <code><a href="../reference/decomp_pair.html">decomp_pair()</a></code> match rows to on/off combinations by their factor values, so row order no longer matters (<a href="https://github.com/aucarter/shapleydecomp/issues/7" class="external-link">#7</a>). Incomplete or duplicated combinations, or factor values other than 0/1, are now an error instead of a silently wrong result.</li>
+<li>
+<code><a href="../reference/decomp_pair.html">decomp_pair()</a></code> returns a <code>data.table</code> with <code>measure</code> first, like <code><a href="../reference/decomp_algebra.html">decomp_algebra()</a></code> (<a href="https://github.com/aucarter/shapleydecomp/issues/4" class="external-link">#4</a>).</li>
 <li>
 <code><a href="../reference/make_run_table.html">make_run_table()</a></code> now prints when called at top level.</li>
 <li>

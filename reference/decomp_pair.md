@@ -14,7 +14,8 @@ decomp_pair(dt, params, summary_var)
 
 - dt:
 
-  A `data.table` with one row per counterfactual combination.
+  A `data.table` with one row per on/off combination of the factors, in
+  any order.
 
 - params:
 
@@ -26,14 +27,12 @@ decomp_pair(dt, params, summary_var)
 
 ## Value
 
-A one-row `data.frame` with one column per factor (named by factor) plus
-a `measure` column.
+A one-row `data.table` with a `measure` column and one column per
+factor.
 
 ## Examples
 
 ``` r
-# Outcomes for every on/off combination of two factors, where the
-# factors interact: y = 10 + 5a + 3b + 2ab
 rt <- make_run_table(c("a", "b"))
 rt[, y := 10 + 5 * a + 3 * b + 2 * a * b]
 #>    run_id     a     b     y
@@ -44,6 +43,7 @@ rt[, y := 10 + 5 * a + 3 * b + 2 * a * b]
 #> 4:      4     1     1    20
 decomp_pair(rt, list(decomp_vars = c("a", "b"), decomp_method = "shapley"),
             "y")
-#>   a b measure
-#> 1 6 4       y
+#>    measure     a     b
+#>     <char> <num> <num>
+#> 1:       y     6     4
 ```

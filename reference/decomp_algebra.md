@@ -1,8 +1,6 @@
 # Decompose all summary variables for a single group
 
-Applies
-[`decomp_pair()`](https://aucarter.github.io/shapleydecomp/reference/decomp_pair.md)
-to each summary variable.
+Decompose all summary variables for a single group
 
 ## Usage
 
@@ -14,8 +12,8 @@ decomp_algebra(data, params)
 
 - data:
 
-  A `data.table` for a single location × decomp-year with one row per
-  counterfactual combination.
+  A `data.table` for a single group × decomp-year with one row per
+  on/off combination of the factors, in any order.
 
 - params:
 
@@ -23,7 +21,8 @@ decomp_algebra(data, params)
 
 ## Value
 
-A `data.table` with one row per summary variable.
+A `data.table` with one row per summary variable: a `measure` column and
+one column per factor.
 
 ## Examples
 

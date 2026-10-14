@@ -166,12 +166,10 @@ are optional and speed things up.
   : Construct counterfactual parameters for a factor
 - [`prepare_decomp()`](https://aucarter.github.io/shapleydecomp/reference/prepare_decomp.md)
   : Prepare the model for decomposition
-- [`supports_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/supports_warm_start.md)
-  : Check whether a model supports warm starts
-- [`get_warm_start_state()`](https://aucarter.github.io/shapleydecomp/reference/get_warm_start_state.md)
-  : Extract model state at a given year for warm restart
-- [`run_from_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/run_from_warm_start.md)
-  : Run a simulation from a saved warm-start state
+- [`supports_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/warm_start.md)
+  [`get_warm_start_state()`](https://aucarter.github.io/shapleydecomp/reference/warm_start.md)
+  [`run_from_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/warm_start.md)
+  : Warm starts
 
 ## Decomposition algebra
 
@@ -181,7 +179,7 @@ outcomes for every on/off combination.
 - [`make_run_table()`](https://aucarter.github.io/shapleydecomp/reference/make_run_table.md)
   : Generate the factorial run table for decomposition
 - [`run_decomp()`](https://aucarter.github.io/shapleydecomp/reference/run_decomp.md)
-  : Run decomposition across locations and decomp years
+  : Run decomposition across groups and decomp years
 - [`decomp_algebra()`](https://aucarter.github.io/shapleydecomp/reference/decomp_algebra.md)
   : Decompose all summary variables for a single group
 - [`decomp_pair()`](https://aucarter.github.io/shapleydecomp/reference/decomp_pair.md)

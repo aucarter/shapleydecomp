@@ -262,7 +262,7 @@ shape of what comes back. Run it before a long decomposition.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "decomp"          "step_scenarios"  "extended_decomp" "run_table"      </span></span>
-<span><span class="co">#&gt; [5] "params"</span></span>
+<span><span class="co">#&gt; [5] "run_summary"     "params"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">decomp</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    decomp_year    measure beta_reduction treatment_effect</span></span>
 <span><span class="co">#&gt;          &lt;int&gt;     &lt;char&gt;          &lt;num&gt;            &lt;num&gt;</span></span>
@@ -312,7 +312,7 @@ interventions off from 2000.</p>
 <span><span class="va">chk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">inf</span>, <span class="va">obs</span>, by <span class="op">=</span> <span class="st">"year"</span><span class="op">)</span>, <span class="va">off</span>, by <span class="op">=</span> <span class="st">"year"</span><span class="op">)</span></span>
 <span><span class="va">chk</span><span class="op">[</span>, <span class="va">gap</span> <span class="op">:=</span> <span class="va">beta_reduction</span> <span class="op">+</span> <span class="va">treatment_effect</span> <span class="op">-</span> <span class="op">(</span><span class="va">observed</span> <span class="op">-</span> <span class="va">infections</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">chk</span><span class="op">$</span><span class="va">gap</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2.842171e-14</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 1.136868e-13</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="two-questions-two-counterfactuals">5. Two questions, two counterfactuals<a class="anchor" aria-label="anchor" href="#two-questions-two-counterfactuals"></a>
@@ -354,8 +354,8 @@ is attributed.</p>
 <ul>
 <li>
 <strong>Speed.</strong> Implement
-<code><a href="../reference/supports_warm_start.html">supports_warm_start()</a></code>, <code><a href="../reference/get_warm_start_state.html">get_warm_start_state()</a></code>
-and <code><a href="../reference/run_from_warm_start.html">run_from_warm_start()</a></code>, and each counterfactual restarts
+<code><a href="../reference/warm_start.html">supports_warm_start()</a></code>, <code><a href="../reference/warm_start.html">get_warm_start_state()</a></code>
+and <code><a href="../reference/warm_start.html">run_from_warm_start()</a></code>, and each counterfactual restarts
 from the observed state the year before the decomposition year instead
 of from the start of the simulation. On Unix, <code>n_cores</code> runs
 the counterfactuals for a year in parallel.</li>

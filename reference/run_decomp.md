@@ -1,8 +1,7 @@
-# Run decomposition across locations and decomp years
+# Run decomposition across groups and decomp years
 
-Applies
-[`decomp_algebra()`](https://aucarter.github.io/shapleydecomp/reference/decomp_algebra.md)
-to each location × decomp-year group in the data.
+Applies the Shapley decomposition to each group × decomp-year in the
+data.
 
 ## Usage
 
@@ -14,9 +13,10 @@ run_decomp(data, params)
 
 - data:
 
-  A `data.table` with columns: `ihme_loc_id`, `decomp_year`, one column
-  per decomp variable (0/1 indicator), and one column per summary
-  variable.
+  A `data.table` with one column per decomp variable (0/1 indicator),
+  one column per summary variable, and optionally a `decomp_year` column
+  and the `group_vars` columns. Each group must have exactly one row per
+  on/off combination; row order does not matter.
 
 - params:
 
@@ -35,10 +35,15 @@ run_decomp(data, params)
   :   Character, `"shapley"` (`"das_gupta"` accepted as a deprecated
       alias)
 
+  group_vars
+
+  :   Optional character vector of grouping columns, such as a location
+      identifier
+
 ## Value
 
-A `data.table` with one row per location × decomp-year × measure, and
-one column per factor giving its decomposition effect.
+A `data.table` with one row per group × decomp-year × measure, and one
+column per factor giving its decomposition effect.
 
 ## Examples
 

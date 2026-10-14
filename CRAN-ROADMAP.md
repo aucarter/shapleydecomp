@@ -32,7 +32,11 @@ same commit. - `hiv_decomp/R/adapters/*.R`:
 `decomposer::CF_TOTAL_IMPACT` and the related constants. -
 `manuscript/main.tex`: `\pkg{decomposer}` throughout.
 
-### 1.2 Deploy the site so its URLs resolve: in progress
+### 1.2 Deploy the site so its URLs resolve: done
+
+Live at <https://aucarter.github.io/shapleydecomp/> since 2026-10-13.
+The R-CMD-check workflow passed on all five platforms (macOS, Windows,
+and Ubuntu on devel / release / oldrel-1) at `ddd2957`.
 
 `DESCRIPTION`, the README and the package help page link to
 `https://aucarter.github.io/decomposeR/`. CRAN checks every URL, and
@@ -75,22 +79,32 @@ first run, enable Pages in the repo settings with source branch
 
 ## 3. Should fix before submitting
 
-CRAN reviewers read these, and they cost an extra round of review if
-they come back.
+Done (2026-10-13): - `ihme_loc_id` grouping replaced by a `group_vars`
+argument
+([`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md),
+[`run_decomp()`](https://aucarter.github.io/shapleydecomp/reference/run_decomp.md),
+[`sequential_totals()`](https://aucarter.github.io/shapleydecomp/reference/sequential_totals.md)). -
+The internal `hiv_decomp` reference removed from the `future_policies`
+docs. - `DESCRIPTION` rewritten, with references in CRAN form: Shapley
+(1953) <doi:10.1515/9781400881970-018> (DOI verified against Crossref)
+and Das Gupta (1993) (URL verified). - The stale run-table comment
+fixed. - Spelling pass, with domain terms in `inst/WORDLIST`. URL check:
+all URLs correct. - Found along the way: the warm-start docs described a
+contract the code doesn’t follow. They now document what
+[`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md)
+actually passes, with a runnable example. `n_cores > 1` on Windows now
+falls back instead of erroring.
 
-| Item | Where | Why | Size |
-|----|----|----|----|
-| Hard-coded `ihme_loc_id` grouping | [`run_decomp()`](https://aucarter.github.io/shapleydecomp/reference/run_decomp.md), [`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md), [`sequential_totals()`](https://aucarter.github.io/shapleydecomp/reference/sequential_totals.md) | A generic package should not recognise one institution’s column name. Replace it with a `by` argument whose default reproduces today’s behaviour. | S |
-| Internal reference in the docs | [`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md) `@param future_policies` | Mentions `hiv_decomp run_simmod_mean.R`, which no outside reader can see. Cite the manuscript instead. | S |
-| Maintainer email | `DESCRIPTION` | CRAN mails the maintainer about every check failure for the life of the package, and an address that bounces leads to archival. Choose an address you will keep. | S |
-| References in `Description` | `DESCRIPTION` | CRAN asks for method references in the form `Authors (year) <doi:...>`: Shapley (1953) <doi:10.1515/9781400881970-018>, Das Gupta (1993), and the manuscript once it has a DOI. Also add `inst/CITATION`. | S |
-| Stale comment | `R/run_table.R` header | Says “3^n rows if decomp_scalar = 0”; the code produces 2^n binary rows. | S |
-| Title and description wording | `DESCRIPTION` | Quote software names in single quotes (`'data.table'`) and avoid starting with “A …”. These are routine first-review comments. | S |
-| Spelling and URL pass |  | Run `spelling::spell_check_package()` and `urlchecker::url_check()`. | S |
+Still open (tracked as GitHub issues): - Confirm the maintainer email,
+then run the external checks and submit (tracking issue). - Give the
+full citation for the sequential-Shapley reference in the
+`future_policies` docs. - `decomp_scalar` values other than 0 give wrong
+results. - Rename `\pkg{decomposer}` in the manuscript, and add
+`inst/CITATION` once it has a DOI.
 
 ## 4. Submission steps
 
-1.  Confirm the site deploys and the CI matrix is green.
+1.  ~~Confirm the site deploys and the CI matrix is green.~~ Done.
 2.  Move the callers listed in 1.1 when convenient. CRAN does not need
     this.
 3.  Work through section 3.

@@ -71,7 +71,8 @@
 <p>Callers outside this repo still use the old name. They keep working because they load the installed <code>decomposer 0.2.0</code> build, and each needs moving when it next takes an update: - <code>leapfrog_adulthiv</code>: <code>r_libs.lock</code> pins <code>decomposer 0.2.0</code>, and <code>R/decomp_structural.R</code> calls <code>decomposer::</code>. Install a <code>shapleydecomp</code> build with <code>install_pinned()</code>, bump the lockfile, and replace <code>decomposer::</code> and <code>decompose(</code> in the same commit. - <code>hiv_decomp/R/adapters/*.R</code>: <code>decomposer::CF_TOTAL_IMPACT</code> and the related constants. - <code>manuscript/main.tex</code>: <code>\pkg{decomposer}</code> throughout.</p>
 </div>
 <div class="section level3">
-<h3 id="id_12-deploy-the-site-so-its-urls-resolve-in-progress">1.2 Deploy the site so its URLs resolve: in progress<a class="anchor" aria-label="anchor" href="#id_12-deploy-the-site-so-its-urls-resolve-in-progress"></a></h3>
+<h3 id="id_12-deploy-the-site-so-its-urls-resolve-done">1.2 Deploy the site so its URLs resolve: done<a class="anchor" aria-label="anchor" href="#id_12-deploy-the-site-so-its-urls-resolve-done"></a></h3>
+<p>Live at <a href="https://aucarter.github.io/shapleydecomp/" class="uri">https://aucarter.github.io/shapleydecomp/</a> since 2026-10-13. The R-CMD-check workflow passed on all five platforms (macOS, Windows, and Ubuntu on devel / release / oldrel-1) at <code>ddd2957</code>.</p>
 <p><code>DESCRIPTION</code>, the README and the package help page link to <code>https://aucarter.github.io/decomposeR/</code>. CRAN checks every URL, and these return 404 until the <code>pkgdown</code> workflow has run once. After the first run, enable Pages in the repo settings with source branch <code>gh-pages</code>, folder <code>/</code>.</p>
 </div>
 </div>
@@ -93,49 +94,13 @@
 </ul></div>
 <div class="section level2">
 <h2 id="id_3-should-fix-before-submitting">3. Should fix before submitting<a class="anchor" aria-label="anchor" href="#id_3-should-fix-before-submitting"></a></h2>
-<p>CRAN reviewers read these, and they cost an extra round of review if they come back.</p>
-<table class="table"><colgroup><col width="25%"><col width="25%"><col width="25%"><col width="25%"></colgroup><thead><tr><th>Item</th>
-<th>Where</th>
-<th>Why</th>
-<th>Size</th>
-</tr></thead><tbody><tr><td>Hard-coded <code>ihme_loc_id</code> grouping</td>
-<td>
-<code><a href="reference/run_decomp.html">run_decomp()</a></code>, <code><a href="reference/shapley_decompose.html">shapley_decompose()</a></code>, <code><a href="reference/sequential_totals.html">sequential_totals()</a></code>
-</td>
-<td>A generic package should not recognise one institution’s column name. Replace it with a <code>by</code> argument whose default reproduces today’s behaviour.</td>
-<td>S</td>
-</tr><tr><td>Internal reference in the docs</td>
-<td>
-<code><a href="reference/shapley_decompose.html">shapley_decompose()</a></code> <code>@param future_policies</code>
-</td>
-<td>Mentions <code>hiv_decomp run_simmod_mean.R</code>, which no outside reader can see. Cite the manuscript instead.</td>
-<td>S</td>
-</tr><tr><td>Maintainer email</td>
-<td><code>DESCRIPTION</code></td>
-<td>CRAN mails the maintainer about every check failure for the life of the package, and an address that bounces leads to archival. Choose an address you will keep.</td>
-<td>S</td>
-</tr><tr><td>References in <code>Description</code>
-</td>
-<td><code>DESCRIPTION</code></td>
-<td>CRAN asks for method references in the form <code>Authors (year) &lt;doi:...&gt;</code>: Shapley (1953) <a href="doi:10.1515/9781400881970-018" class="uri">doi:10.1515/9781400881970-018</a>, Das Gupta (1993), and the manuscript once it has a DOI. Also add <code>inst/CITATION</code>.</td>
-<td>S</td>
-</tr><tr><td>Stale comment</td>
-<td>
-<code>R/run_table.R</code> header</td>
-<td>Says “3^n rows if decomp_scalar = 0”; the code produces 2^n binary rows.</td>
-<td>S</td>
-</tr><tr><td>Title and description wording</td>
-<td><code>DESCRIPTION</code></td>
-<td>Quote software names in single quotes (<code>'data.table'</code>) and avoid starting with “A …”. These are routine first-review comments.</td>
-<td>S</td>
-</tr><tr><td>Spelling and URL pass</td>
-<td></td>
-<td>Run <code>spelling::spell_check_package()</code> and <code>urlchecker::url_check()</code>.</td>
-<td>S</td>
-</tr></tbody></table></div>
+<p>Done (2026-10-13): - <code>ihme_loc_id</code> grouping replaced by a <code>group_vars</code> argument (<code><a href="reference/shapley_decompose.html">shapley_decompose()</a></code>, <code><a href="reference/run_decomp.html">run_decomp()</a></code>, <code><a href="reference/sequential_totals.html">sequential_totals()</a></code>). - The internal <code>hiv_decomp</code> reference removed from the <code>future_policies</code> docs. - <code>DESCRIPTION</code> rewritten, with references in CRAN form: Shapley (1953) <a href="doi:10.1515/9781400881970-018" class="uri">doi:10.1515/9781400881970-018</a> (DOI verified against Crossref) and Das Gupta (1993) <census bureau p23-186 pdf> (URL verified). - The stale run-table comment fixed. - Spelling pass, with domain terms in <code>inst/WORDLIST</code>. URL check: all URLs correct. - Found along the way: the warm-start docs described a contract the code doesn’t follow. They now document what <code><a href="reference/shapley_decompose.html">shapley_decompose()</a></code> actually passes, with a runnable example. <code>n_cores &gt; 1</code> on Windows now falls back instead of erroring.</census></p>
+<p>Still open (tracked as GitHub issues): - Confirm the maintainer email, then run the external checks and submit (tracking issue). - Give the full citation for the sequential-Shapley reference in the <code>future_policies</code> docs. - <code>decomp_scalar</code> values other than 0 give wrong results. - Rename <code>\pkg{decomposer}</code> in the manuscript, and add <code>inst/CITATION</code> once it has a DOI.</p>
+</div>
 <div class="section level2">
 <h2 id="id_4-submission-steps">4. Submission steps<a class="anchor" aria-label="anchor" href="#id_4-submission-steps"></a></h2>
-<ol style="list-style-type: decimal"><li>Confirm the site deploys and the CI matrix is green.</li>
+<ol style="list-style-type: decimal"><li>
+<del>Confirm the site deploys and the CI matrix is green.</del> Done.</li>
 <li>Move the callers listed in 1.1 when convenient. CRAN does not need this.</li>
 <li>Work through section 3.</li>
 <li>Bump the version (suggest <code>1.0.0</code>, given the API commitment) and update <code>NEWS.md</code>.</li>

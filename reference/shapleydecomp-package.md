@@ -1,12 +1,16 @@
-# shapleydecomp: Generic Decomposition Framework for Discrete-Time Simulations
+# shapleydecomp: Shapley Value Decomposition for Discrete-Time Simulation Models
 
-A model-agnostic decomposition framework that attributes changes in
-simulation outcomes to individual input factors using Shapley value
-decomposition. Any calibrated discrete-time simulation model can be
-decomposed by implementing a small set of S3 methods: run the model,
-summarize outputs, and construct counterfactual inputs. Supports two
-counterfactual types: "change_since" (hold factor at baseline-year
-value) and "total_impact" (set factor to zero).
+Attributes changes in the outcomes of a discrete-time simulation model
+to its input factors using the Shapley value of Shapley (1953)
+[doi:10.1515/9781400881970-018](https://doi.org/10.1515/9781400881970-018)
+, which for binary factors coincides with the symmetric standardization
+of Das Gupta (1993)
+<https://www2.census.gov/library/publications/1993/demographics/p23-186.pdf>.
+Any calibrated model can be decomposed by implementing four S3 methods
+that run the model, summarize its output, and construct counterfactual
+inputs. Counterfactuals either remove a factor entirely or hold it at
+its value in a baseline year, and a sequential decomposition attributes
+each year's policy conditional on the past.
 
 ## See also
 
