@@ -236,7 +236,7 @@ shapley_decompose <- function(model,
   tasks[, how := "simulate"]
   tasks[run_id == all_off_id & (decomp_year - 1L) %in% decomp_years,
         how := "previous_all_on"]
-  groups <- unique(tasks[how == "simulate", .(decomp_year, canonical)])
+  groups <- unique(tasks[how == "simulate", list(decomp_year, canonical)])
   members <- split(tasks[how == "simulate"],
                    by = c("decomp_year", "canonical"), keep.by = FALSE)
 
@@ -310,7 +310,7 @@ shapley_decompose <- function(model,
   }
   get_sim <- function(y, rid) get(paste(y, rid), envir = lookup)
 
-  run_summary <- tasks[, .(runs = .N,
+  run_summary <- tasks[, list(runs = .N,
                            reused_across_steps = sum(how == "previous_all_on")),
                        by = decomp_year]
   run_summary[, simulated := vapply(decomp_year, function(y) {
