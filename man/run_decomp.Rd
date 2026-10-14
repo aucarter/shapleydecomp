@@ -2,14 +2,16 @@
 % Please edit documentation in R/decomp_algebra.R
 \name{run_decomp}
 \alias{run_decomp}
-\title{Run decomposition across locations and decomp years}
+\title{Run decomposition across groups and decomp years}
 \usage{
 run_decomp(data, params)
 }
 \arguments{
 \item{data}{A \code{data.table} with one column per decomp variable (0/1
 indicator), one column per summary variable, and optionally a
-\code{decomp_year} column and the \code{group_vars} columns.}
+\code{decomp_year} column and the \code{group_vars} columns. Each group
+must have exactly one row per on/off combination; row order does not
+matter.}
 
 \item{params}{A list with at least:
 \describe{
@@ -26,7 +28,7 @@ A \code{data.table} with one row per group × decomp-year ×
 measure, and one column per factor giving its decomposition effect.
 }
 \description{
-Applies \code{decomp_algebra()} to each group × decomp-year in the data.
+Applies the Shapley decomposition to each group × decomp-year in the data.
 }
 \examples{
 # Outcomes for every on/off combination of two factors, where the

@@ -7,16 +7,17 @@
 decomp_algebra(data, params)
 }
 \arguments{
-\item{data}{A \code{data.table} for a single location × decomp-year with
-one row per counterfactual combination.}
+\item{data}{A \code{data.table} for a single group × decomp-year with
+one row per on/off combination of the factors, in any order.}
 
 \item{params}{Parameter list (see \code{run_decomp}).}
 }
 \value{
-A \code{data.table} with one row per summary variable.
+A \code{data.table} with one row per summary variable: a
+\code{measure} column and one column per factor.
 }
 \description{
-Applies \code{decomp_pair()} to each summary variable.
+Decompose all summary variables for a single group
 }
 \examples{
 # Outcomes for every on/off combination of two factors, where the

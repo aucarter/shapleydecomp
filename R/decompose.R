@@ -280,7 +280,9 @@ shapley_decompose <- function(model,
     # ---- Extended factor decomposition ----
     if (extended) {
       ext_group <- c(group_vars, "year")
-      ext <- summary_dt[year >= y, decomp_algebra(.SD, decomp_params), by = ext_group]
+      ext <- shapley_values(summary_dt[year >= y], factors,
+                            intersect(summary_vars, names(summary_dt)),
+                            by = ext_group)
       ext[, decomp_year := y]
       ext_decomp_list[[as.character(y)]] <<- ext
     }

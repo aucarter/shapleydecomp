@@ -7,8 +7,8 @@
 decomp_pair(dt, params, summary_var)
 }
 \arguments{
-\item{dt}{A \code{data.table} with one row per counterfactual
-combination.}
+\item{dt}{A \code{data.table} with one row per on/off combination
+of the factors, in any order.}
 
 \item{params}{Parameter list with \code{decomp_vars} and
 \code{decomp_method}.}
@@ -16,8 +16,8 @@ combination.}
 \item{summary_var}{Character, the name of the summary variable column.}
 }
 \value{
-A one-row \code{data.frame} with one column per factor (named by
-factor) plus a \code{measure} column.
+A one-row \code{data.table} with a \code{measure} column and one
+column per factor.
 }
 \description{
 For each factor, computes the weighted average marginal effect of switching
@@ -25,8 +25,6 @@ the factor from 0 (counterfactual) to 1 (observed), averaging over all
 combinations of the other factors.
 }
 \examples{
-# Outcomes for every on/off combination of two factors, where the
-# factors interact: y = 10 + 5a + 3b + 2ab
 rt <- make_run_table(c("a", "b"))
 rt[, y := 10 + 5 * a + 3 * b + 2 * a * b]
 decomp_pair(rt, list(decomp_vars = c("a", "b"), decomp_method = "shapley"),

@@ -17,6 +17,16 @@
   `warm_start_year`.
 * `n_cores > 1` on Windows falls back to sequential with a warning instead of
   failing.
+* The Shapley algebra is now a single weight-matrix product over all
+  groups, years and measures (#8). With 200 draws as groups, a full
+  `shapley_decompose()` run is 5-7x faster and the decomposition step alone
+  about 130x faster, with results identical to rounding.
+* `run_decomp()`, `decomp_algebra()` and `decomp_pair()` match rows to on/off
+  combinations by their factor values, so row order no longer matters (#7).
+  Incomplete or duplicated combinations, or factor values other than 0/1,
+  are now an error instead of a silently wrong result.
+* `decomp_pair()` returns a `data.table` with `measure` first, like
+  `decomp_algebra()` (#4).
 * `make_run_table()` now prints when called at top level.
 * `shapley_decompose()` reports progress with `message()` instead of `cat()`.
 

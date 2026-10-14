@@ -114,3 +114,76 @@ test_that("unknown decomp method raises error", {
   )
   expect_error(decomp_pair(dt, params, "outcome"), "Unknown decomp_method")
 })
+
+
+# ---------------------------------------------------------------------------
+#  Shapley values against the textbook definition
+# ---------------------------------------------------------------------------
+
+# phi_i = sum over S not containing i of |S|! (n-|S|-1)! / n! * (v(S+i) - v(S))
+shapley_by_definition <- function(v, factors) {
+  n <- length(factors)
+  rt <- make_run_table(factors)
+  key <- function(on) paste(as.integer(factors %in% on), collapse = "")
+  val <- setNames(v, apply(as.matrix(rt[, factors, with = FALSE]), 1, paste, collapse = ""))
+  vapply(factors, function(f) {
+    others <- setdiff(factors, f)
+    subsets <- unlist(lapply(0:length(others), function(k) combn(others, k, simplify = FALSE)),
+                      recursive = FALSE)
+    sum(vapply(subsets, function(S) {
+      k <- length(S)
+      factorial(k) * factorial(n - k - 1) / factorial(n) *
+        (val[[key(c(S, f))]] - val[[key(S)]])
+    }, numeric(1)))
+  }, numeric(1))
+}
+
+test_that("decomp_algebra matches the Shapley definition with interactions", {
+  set.seed(1)
+  f <- paste0("f", 1:4)
+  rt <- make_run_table(f)
+  rt[, y := 10 + 3 * f1 - 2 * f2 * f3 + 5 * f1 * f2 * f4 + rnorm(.N)]
+  p <- list(decomp_vars = f, decomp_method = "shapley", summary_vars = "y")
+  res <- decomp_algebra(rt, p)
+  expect_equal(unlist(res[, f, with = FALSE]), shapley_by_definition(rt$y, f),
+               tolerance = 1e-12)
+})
+
+test_that("row order does not change the decomposition", {
+  set.seed(2)
+  f <- c("a", "b", "c")
+  rt <- make_run_table(f)
+  rt[, y := 10 + 5 * a + 3 * b + 2 * a * c - 4 * b * c]
+  p <- list(decomp_vars = f, decomp_method = "shapley", summary_vars = "y")
+  expect_equal(decomp_algebra(rt[sample(.N)], p), decomp_algebra(rt, p))
+  expect_equal(decomp_pair(rt[sample(.N)], p, "y"), decomp_pair(rt, p, "y"))
+})
+
+test_that("run_decomp handles several groups and measures in any order", {
+  set.seed(3)
+  f <- c("a", "b")
+  rt <- make_run_table(f)
+  dt <- rbindlist(lapply(c("X", "Y", "Z"), function(loc) {
+    cbind(location = loc, decomp_year = 2001L, rt)
+  }))
+  dt[, y1 := rnorm(.N)][, y2 := rnorm(.N)]
+  p <- list(decomp_vars = f, decomp_method = "shapley",
+            summary_vars = c("y1", "y2"), group_vars = "location")
+  res <- run_decomp(dt[sample(.N)], p)
+  expect_equal(nrow(res), 6)
+  for (loc in c("X", "Y", "Z")) for (v in c("y1", "y2")) {
+    expect_equal(unlist(res[location == loc & measure == v, f, with = FALSE]),
+                 shapley_by_definition(dt[location == loc][order(run_id)][[v]], f),
+                 tolerance = 1e-12)
+  }
+})
+
+test_that("incomplete or ungrouped input is an error, not a wrong answer", {
+  rt <- make_run_table(c("a", "b"))
+  rt[, y := 1:4]
+  p <- list(decomp_vars = c("a", "b"), decomp_method = "shapley", summary_vars = "y")
+  expect_error(decomp_algebra(rt[-2], p), "exactly one row per on/off")
+  expect_error(decomp_algebra(rbind(rt, rt), p), "exactly one row per on/off")
+  bad <- copy(rt)[, a := a * 2]
+  expect_error(decomp_algebra(bad, p), "must be 0")
+})
