@@ -103,6 +103,10 @@ per decomp year × measure, factor effects in columns)}
 \item{extended_decomp}{data.table — extended decomposition (factor
 effects at all years >= decomp year). NULL if \code{extended = FALSE}.}
 \item{run_table}{data.table — the factorial design table used.}
+\item{run_summary}{data.table — per decomp year: the number of
+coalition runs, how many were simulated, how many were reused from
+the previous step, and the factors that were null players (their
+counterfactual left the params unchanged, so their effect is 0).}
 \item{params}{List of decomposition parameters used.}
 }
 }

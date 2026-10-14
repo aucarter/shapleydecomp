@@ -31,6 +31,13 @@
   - the "every factor off from y + 1" parameters are built once per year
     (per worker) rather than once per run.
   Outputs are identical to the previous version.
+* Factors whose counterfactual leaves a step's parameters unchanged, such as
+  a programme that has not started yet, are detected as null players. Their
+  effect at that step is 0, and coalitions that differ only in null factors
+  are simulated once (#10). A run is reused only after confirming its
+  parameters are `identical()`, so a model whose counterfactuals interact
+  loses the saving, never correctness. The new `run_summary` output reports,
+  per decomp year, the runs simulated and reused and the null factors.
 * A failed simulation inside `n_cores > 1` now stops with the decomp year and
   run that failed, instead of a later, unrelated-looking error.
 * `summarize_results()` (and `prepare_decomp()`'s `full_summary`) may return
