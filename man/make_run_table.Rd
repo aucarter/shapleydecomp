@@ -4,17 +4,14 @@
 \alias{make_run_table}
 \title{Generate the factorial run table for decomposition}
 \usage{
-make_run_table(factors, decomp_scalar = 0)
+make_run_table(factors)
 }
 \arguments{
 \item{factors}{Character vector of factor names.}
-
-\item{decomp_scalar}{Numeric, the lower bound of the factor scale.
-Default is 0 (binary: 0 = off, 1 = on).}
 }
 \value{
-A \code{data.table} with columns: \code{run_id} (integer), and one
-column per factor with values in \code{decomp_scalar:1}.
+A \code{data.table} with 2^n rows: \code{run_id} (integer), and one
+column per factor with values 0 or 1.
 }
 \description{
 Creates a \code{data.table} with one row per counterfactual combination.

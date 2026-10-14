@@ -21,6 +21,13 @@
   groups, years and measures (#8). With 200 draws as groups, a full
   `shapley_decompose()` run is 5-7x faster and the decomposition step alone
   about 130x faster, with results identical to rounding.
+* The `decomp_scalar` argument is removed from `shapley_decompose()` and
+  `make_run_table()` (#1). Factor levels came from `decomp_scalar:1`, so any
+  value other than 0 either collapsed the design (`0.5:1` is `0.5`) or added
+  a level beyond "off" (`-1:1`), and the algebra gave wrong results for
+  both. Every known caller used 0. For a counterfactual between on and off,
+  define it in the model's `build_counterfactual()` (see the Methods
+  vignette).
 * The `future_policies` argument is removed. Sequential Shapley with future
   policies at their counterfactual, the former default `"off"`, is the only
   method. `"on"` was kept only to reproduce runs from before version 0.2.0:

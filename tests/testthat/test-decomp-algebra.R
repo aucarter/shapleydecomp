@@ -8,13 +8,13 @@ library(testthat)
 library(data.table)
 
 test_that("make_run_table generates correct factorial design", {
-  rt <- make_run_table(c("a", "b"), decomp_scalar = 0)
+  rt <- make_run_table(c("a", "b"))
   expect_equal(nrow(rt), 4)  # 2^2
   expect_true("run_id" %in% names(rt))
   expect_true(all(c("a", "b") %in% names(rt)))
   expect_equal(rt$run_id, 1:4)
 
-  rt3 <- make_run_table(c("x", "y", "z"), decomp_scalar = 0)
+  rt3 <- make_run_table(c("x", "y", "z"))
   expect_equal(nrow(rt3), 8)  # 2^3
 })
 

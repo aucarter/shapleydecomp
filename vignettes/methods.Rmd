@@ -90,6 +90,22 @@ these definitions for your model's parameters. For example, "zero" for a
 coverage factor might mean no coverage, while for a rate it might mean a
 reference rate.
 
+### Counterfactuals in between on and off
+
+Every factor is either observed or counterfactual, but the counterfactual
+does not have to be zero. To ask what coverage *above* some reference
+achieved, such as half of observed coverage or a target level, define that
+reference as the counterfactual in your model's `get_baseline_value()` and
+`build_counterfactual()`. The decomposition is unchanged and still needs
+$2^n$ runs per step. It attributes the difference between the observed
+world and the reference world.
+
+Two related questions are different methods, not settings of this one.
+Splitting credit along a continuous path from off to observed is the
+Aumann-Shapley value, which differs from the Shapley value only when
+factors interact non-linearly. Asking what would happen at 50% coverage is a
+scenario projection, not an attribution.
+
 ## Decomposing over time: sequential Shapley
 
 Simulations carry state forward. Infections averted in 2005 change the

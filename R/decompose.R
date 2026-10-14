@@ -41,8 +41,6 @@
 #'   intervention.
 #' @param baseline_year  Integer, the reference year for \code{"change_since"}
 #'   counterfactuals. Defaults to \code{min(decomp_years)}.
-#' @param decomp_scalar  Numeric, lower bound for the factor levels in the
-#'   run table. Default 0 (binary on/off).
 #' @param extended       Logical, whether to compute the extended factor
 #'   decomposition (effects at all output years >= decomp year). Default TRUE.
 #' @param step_scenarios Logical, whether to compute step scenarios (all-on
@@ -116,7 +114,6 @@ shapley_decompose <- function(model,
                               method         = "shapley",
                               cf_type        = CF_CHANGE_SINCE,
                               baseline_year  = min(decomp_years),
-                              decomp_scalar  = 0,
                               extended       = TRUE,
                               step_scenarios = TRUE,
                               verbose        = TRUE,
@@ -151,7 +148,7 @@ shapley_decompose <- function(model,
   )
 
   # ---- Generate run table ----
-  run_table <- make_run_table(factors, decomp_scalar)
+  run_table <- make_run_table(factors)
   all_on_id  <- max(run_table$run_id)
   all_off_id <- min(run_table$run_id)
 
