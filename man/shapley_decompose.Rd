@@ -19,7 +19,6 @@ shapley_decompose(
   verbose = TRUE,
   n_cores = 1L,
   group_vars = character(),
-  future_policies = c("off", "on"),
   ...
 )
 }
@@ -74,22 +73,6 @@ it falls back to sequential with a warning.}
 \code{summarize_results()} that identify independent groups, such as
 locations or draws, each decomposed separately. Default none.}
 
-\item{future_policies}{Character, what every factor does AFTER the decomp
-year in each coalition run. \code{"off"} is sequential Shapley as specified
-(Carter, "Estimating the impact of public health policies ... with Shapley
-value decomposition", Algorithm 1): at step y all policies before y are at
-their observed values, all policies after y are at their counterfactual,
-and only the year-y policy varies across coalitions. The attribution at
-step y is then the marginal impact of the year-y policy conditional on the
-past and undiluted by the future, and \code{sequential_totals()} sums the
-steps into each factor's total impact at every year. This is the
-default. \code{"on"} (the behaviour before version 0.2.0, kept for
-reproducing old runs) leaves a factor that is "on" in a coalition at its
-observed values for ALL years, including after y; its same-year
-attribution equals \code{"off"}'s for any causal model, but its
-\code{extended_decomp} rows (year > decomp year) include future policies
-and must not be summed across steps.}
-
 \item{...}{Additional arguments passed to model methods.}
 }
 \value{
@@ -114,6 +97,17 @@ counterfactual left the params unchanged, so their effect is 0).}
 This is the main user-facing function. Given a model object that implements
 the shapleydecomp S3 interface, it performs a complete factorial decomposition
 of the specified factors across all decomposition years.
+}
+\details{
+The decomposition is sequential (Carter, "Estimating the impact of public
+health policies ... with Shapley value decomposition", Algorithm 1). At
+each decomp year y, every policy before y is at its observed value, every
+policy after y is at its counterfactual, and only the year-y policy varies
+across the 2^n coalitions. The attribution at step y is therefore the
+marginal impact of the year-y policy, conditional on the past and undiluted
+by the future. \code{extended_decomp} records that impact at every later
+year, and \code{sequential_totals()} sums the steps into each factor's
+total impact at every year.
 }
 \examples{
 # A two-factor SIR model shipped with the package

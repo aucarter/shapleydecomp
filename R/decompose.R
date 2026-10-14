@@ -48,21 +48,6 @@
 #' @param step_scenarios Logical, whether to compute step scenarios (all-on
 #'   time series per decomp year). Default TRUE.
 #' @param verbose        Logical, print progress messages. Default TRUE.
-#' @param future_policies Character, what every factor does AFTER the decomp
-#'   year in each coalition run. \code{"off"} is sequential Shapley as specified
-#'   (Carter, "Estimating the impact of public health policies ... with Shapley
-#'   value decomposition", Algorithm 1): at step y all policies before y are at
-#'   their observed values, all policies after y are at their counterfactual,
-#'   and only the year-y policy varies across coalitions. The attribution at
-#'   step y is then the marginal impact of the year-y policy conditional on the
-#'   past and undiluted by the future, and \code{sequential_totals()} sums the
-#'   steps into each factor's total impact at every year. This is the
-#'   default. \code{"on"} (the behaviour before version 0.2.0, kept for
-#'   reproducing old runs) leaves a factor that is "on" in a coalition at its
-#'   observed values for ALL years, including after y; its same-year
-#'   attribution equals \code{"off"}'s for any causal model, but its
-#'   \code{extended_decomp} rows (year > decomp year) include future policies
-#'   and must not be summed across steps.
 #' @param group_vars     Character vector of columns in the output of
 #'   \code{summarize_results()} that identify independent groups, such as
 #'   locations or draws, each decomposed separately. Default none.
@@ -90,6 +75,16 @@
 #'       counterfactual left the params unchanged, so their effect is 0).}
 #'     \item{params}{List of decomposition parameters used.}
 #'   }
+#' @details
+#' The decomposition is sequential (Carter, "Estimating the impact of public
+#' health policies ... with Shapley value decomposition", Algorithm 1). At
+#' each decomp year y, every policy before y is at its observed value, every
+#' policy after y is at its counterfactual, and only the year-y policy varies
+#' across the 2^n coalitions. The attribution at step y is therefore the
+#' marginal impact of the year-y policy, conditional on the past and undiluted
+#' by the future. \code{extended_decomp} records that impact at every later
+#' year, and \code{sequential_totals()} sums the steps into each factor's
+#' total impact at every year.
 #' @seealso \code{vignette("shapleydecomp")} for a worked example, and
 #'   \code{\link{validate_model_interface}} to check a model first.
 #' @examples
@@ -127,7 +122,6 @@ shapley_decompose <- function(model,
                               verbose        = TRUE,
                               n_cores        = 1L,
                               group_vars     = character(),
-                              future_policies = c("off", "on"),
                               ...) {
 
   # ---- Validate inputs ----
@@ -137,7 +131,6 @@ shapley_decompose <- function(model,
   stopifnot(cf_type %in% c(CF_CHANGE_SINCE, CF_TOTAL_IMPACT))
   stopifnot(is.character(group_vars))
   method <- normalize_decomp_method(method)
-  future_policies <- match.arg(future_policies)
 
   decomp_years <- sort(as.integer(decomp_years))
   n_cores <- as.integer(max(n_cores, 1L))
@@ -154,8 +147,7 @@ shapley_decompose <- function(model,
     decomp_method = method,
     cf_type       = cf_type,
     baseline_year = baseline_year,
-    group_vars    = group_vars,
-    future_policies = future_policies
+    group_vars    = group_vars
   )
 
   # ---- Generate run table ----
@@ -176,10 +168,6 @@ shapley_decompose <- function(model,
   model        <- prep$model
   params       <- prep$params
   full_sim     <- prep$full_sim
-  # Models may return any data.frame; work with data.table from here on
-  full_summary <- if (!is.null(prep$full_summary)) {
-    as.data.table(prep$full_summary)
-  }
 
   use_warm_start <- supports_warm_start(model, ...)
 
@@ -196,16 +184,14 @@ shapley_decompose <- function(model,
   # All |decomp_years| x 2^n runs depend only on the observed params, so they
   # are mapped in one pass (one parallel map when n_cores > 1). Two kinds of
   # run are not simulated:
-  #   * Under future_policies = "off" the all-off run at step y (counterfactual
-  #     from y) is the same scenario as the all-on run at step y - 1, so it is
-  #     copied from that run.
+  #   * The all-off run at step y (counterfactual from y) is the same scenario
+  #     as the all-on run at step y - 1, so it is copied from that run.
   #   * A factor whose counterfactual leaves the step's params unchanged (e.g. a
   #     programme that has not started yet) is a null player at that step:
   #     switching it on or off gives the same run. Coalitions that differ only
   #     in null factors are grouped and simulated once. Each worker confirms
   #     with identical() that a grouped coalition's params really are the same
   #     before reusing a run, and simulates it otherwise.
-  # Under "on" the all-on run is the observed run, already in full_summary.
 
   # Params with every factor at its counterfactual from y + 1: identical for
   # every coalition at step y.
@@ -218,15 +204,12 @@ shapley_decompose <- function(model,
     }
     p
   }
-  step_base <- function(y) {
-    if (future_policies == "off") make_future_off(y) else params
-  }
   # Each process builds the step base once per year
   base_cache <- new.env()
   cached_base <- function(y) {
     if (!identical(base_cache$year, y)) {
       base_cache$year   <- y
-      base_cache$params <- step_base(y)
+      base_cache$params <- make_future_off(y)
     }
     base_cache$params
   }
@@ -251,10 +234,8 @@ shapley_decompose <- function(model,
                canonical = run_of_code[code_of(b)])
   }))
   tasks[, how := "simulate"]
-  if (future_policies == "off") {
-    tasks[run_id == all_off_id & (decomp_year - 1L) %in% decomp_years,
-          how := "previous_all_on"]
-  }
+  tasks[run_id == all_off_id & (decomp_year - 1L) %in% decomp_years,
+        how := "previous_all_on"]
   groups <- unique(tasks[how == "simulate", .(decomp_year, canonical)])
   members <- split(tasks[how == "simulate"],
                    by = c("decomp_year", "canonical"), keep.by = FALSE)
@@ -268,10 +249,6 @@ shapley_decompose <- function(model,
 
     # Runs already done in this group: params and summary
     done <- list()
-    if (future_policies == "on" && can == all_on_id && !is.null(full_summary)) {
-      done[[1]] <- list(params = params,
-                        summary = full_summary[year %in% output_years])
-    }
     out <- vector("list", length(ids))
     n_sim <- 0L
     for (j in seq_along(ids)) {
@@ -406,7 +383,7 @@ shapley_decompose <- function(model,
 
 #' Total impact per factor at every year from a sequential decomposition
 #'
-#' Sums the step attributions of a \code{future_policies = "off"} run across
+#' Sums the step attributions of a \code{shapley_decompose()} run across
 #' decomposition steps: the total impact of factor i at year T is
 #' \eqn{\sum_{y \le T} \phi_i^{(y)}(T)}, where \eqn{\phi_i^{(y)}(T)} is the
 #' Shapley value at year T of the year-y policy (\code{extended_decomp}). Summed
@@ -415,16 +392,12 @@ shapley_decompose <- function(model,
 #' is contiguous.
 #'
 #' @param result The list returned by \code{shapley_decompose()} with
-#'   \code{extended = TRUE} and \code{future_policies = "off"}.
+#'   \code{extended = TRUE}.
 #' @return data.table with one row per group x year x measure and one column
 #'   per factor.
 #' @seealso \code{\link{shapley_decompose}}, whose examples call this function.
 #' @export
 sequential_totals <- function(result) {
-  if (!identical(result$params$future_policies, "off"))
-    stop("sequential_totals() needs a shapley_decompose(future_policies = \"off\") ",
-         "result: with future policies on, the steps overlap and summing them ",
-         "double-counts.")
   if (is.null(result$extended_decomp))
     stop("sequential_totals() needs extended = TRUE")
   yrs <- sort(unique(result$extended_decomp$decomp_year))

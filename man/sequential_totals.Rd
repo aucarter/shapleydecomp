@@ -8,14 +8,14 @@ sequential_totals(result)
 }
 \arguments{
 \item{result}{The list returned by \code{shapley_decompose()} with
-\code{extended = TRUE} and \code{future_policies = "off"}.}
+\code{extended = TRUE}.}
 }
 \value{
 data.table with one row per group x year x measure and one column
 per factor.
 }
 \description{
-Sums the step attributions of a \code{future_policies = "off"} run across
+Sums the step attributions of a \code{shapley_decompose()} run across
 decomposition steps: the total impact of factor i at year T is
 \eqn{\sum_{y \le T} \phi_i^{(y)}(T)}, where \eqn{\phi_i^{(y)}(T)} is the
 Shapley value at year T of the year-y policy (\code{extended_decomp}). Summed

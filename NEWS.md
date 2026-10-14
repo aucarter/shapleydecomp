@@ -1,11 +1,11 @@
 # shapleydecomp 0.3.0
 
 * The package is renamed from `decomposer` to `shapleydecomp`. CRAN already
-  hosts `DecomposeR`, and CRAN package names are case-insensitive. The API
-  is otherwise unchanged: replace `library(decomposer)` / `decomposer::` with
-  `shapleydecomp`.
+  hosts `DecomposeR`, and CRAN package names are case-insensitive. Replace
+  `library(decomposer)` / `decomposer::` with `shapleydecomp`. The other API
+  changes are listed below.
 * `decompose()` is renamed `shapley_decompose()`, so it no longer masks
-  `stats::decompose()`. The arguments and return value are unchanged.
+  `stats::decompose()`.
 * All exported functions are documented with examples. There are two new
   vignettes, *Get started* and *Methods*, and a pkgdown site.
 * New `group_vars` argument to `shapley_decompose()` (and `group_vars` in
@@ -21,11 +21,17 @@
   groups, years and measures (#8). With 200 draws as groups, a full
   `shapley_decompose()` run is 5-7x faster and the decomposition step alone
   about 130x faster, with results identical to rounding.
+* The `future_policies` argument is removed. Sequential Shapley with future
+  policies at their counterfactual, the former default `"off"`, is the only
+  method. `"on"` was kept only to reproduce runs from before version 0.2.0:
+  its same-year attributions equal `"off"`'s, and its extended rows cannot be
+  summed. Earlier runs remain reproducible with `decomposer` 0.2.0.
+  `result$params` no longer has a `future_policies` element.
 * `shapley_decompose()` does less work for the same result (#9):
   - all counterfactual runs, across all decomp years, go through one
     parallel map, so a decomposition is no longer limited to 2^n cores at a
     time or held up by the slowest run of each year;
-  - with `future_policies = "off"`, the all-off run at step y is reused from
+  - the all-off run at step y is reused from
     the all-on run at step y - 1 rather than simulated again (one run fewer
     per contiguous year);
   - the "every factor off from y + 1" parameters are built once per year
@@ -40,8 +46,7 @@
   per decomp year, the runs simulated and reused and the null factors.
 * A failed simulation inside `n_cores > 1` now stops with the decomp year and
   run that failed, instead of a later, unrelated-looking error.
-* `summarize_results()` (and `prepare_decomp()`'s `full_summary`) may return
-  any data.frame. It is converted to a `data.table` on the way in (#6).
+* `summarize_results()` may return any data.frame. It is converted to a `data.table` on the way in (#6).
 * `run_decomp()`, `decomp_algebra()` and `decomp_pair()` match rows to on/off
   combinations by their factor values, so row order no longer matters (#7).
   Incomplete or duplicated combinations, or factor values other than 0/1,

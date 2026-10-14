@@ -1,7 +1,7 @@
 # ============================================================================
 # tests/testthat/test-sequential.R
 #
-# Sequential Shapley (future_policies = "off") on a model WITH memory: each
+# Sequential Shapley on a model WITH memory: each
 # year's policies add to a decaying protective stock, and the two factors
 # interact, so the year-y policy's effect persists into later years and depends
 # on the other factor. A memoryless model cannot tell the algorithms apart.
@@ -42,16 +42,15 @@ for (g in c("run_simulation", "summarize_results", "get_baseline_value",
   .S3method(g, "mem_model", get(paste0(g, ".mem_model")))
 }
 
-run_mem <- function(future) {
+run_mem <- function() {
   m <- structure(list(), class = "mem_model")
   shapley_decompose(m, create_mem_params(), factors = c("a", "b"),
             summary_vars = "burden", decomp_years = mem_years,
-            cf_type = CF_TOTAL_IMPACT, future_policies = future,
-            step_scenarios = TRUE, verbose = FALSE)
+            cf_type = CF_TOTAL_IMPACT, step_scenarios = TRUE, verbose = FALSE)
 }
 
 test_that("sequential totals telescope to observed minus all-off at every year", {
-  res <- run_mem("off")
+  res <- run_mem()
   tot <- sequential_totals(res)
   m <- structure(list(), class = "mem_model")
   p <- create_mem_params()
@@ -61,28 +60,15 @@ test_that("sequential totals telescope to observed minus all-off at every year",
   expect_equal(tot$a + tot$b, obs - off, tolerance = 1e-12)
 })
 
-test_that("same-year attribution matches between modes (causal model)", {
-  on <- run_mem("on")$decomp; off <- run_mem("off")$decomp
-  expect_equal(on$a, off$a, tolerance = 1e-12)
-  expect_equal(on$b, off$b, tolerance = 1e-12)
-})
-
-test_that("later-year step effects differ: 'on' includes future policies", {
-  on  <- run_mem("on")$extended_decomp
-  off <- run_mem("off")$extended_decomp
-  k <- on$decomp_year == 2000 & on$year == 2010
-  expect_false(isTRUE(all.equal(on$a[k], off$a[off$decomp_year == 2000 & off$year == 2010])))
-})
-
-test_that("the year-y policy's effect decays after y when the future is off", {
-  ext <- run_mem("off")$extended_decomp[decomp_year == 2003]
+test_that("the year-y policy's effect decays after y", {
+  ext <- run_mem()$extended_decomp[decomp_year == 2003]
   # burden is reduced by policies, so attributions are negative; the 2003
   # policy's impact must shrink in magnitude as its stock contribution decays
   expect_true(all(diff(abs(ext$a + ext$b)) < 0))
 })
 
-test_that("step scenarios climb from all-off to observed when the future is off", {
-  st <- run_mem("off")$step_scenarios
+test_that("step scenarios climb from all-off to observed", {
+  st <- run_mem()$step_scenarios
   m <- structure(list(), class = "mem_model")
   obs <- run_simulation(m, create_mem_params())
   last <- st[step_year == max(mem_years)]
@@ -91,11 +77,6 @@ test_that("step scenarios climb from all-off to observed when the future is off"
   expect_equal(s2005[year == 2005, burden], obs[year == 2005, burden], tolerance = 1e-12)
   expect_gt(s2005[year == 2010, burden], obs[year == 2010, burden])
 })
-
-test_that("sequential_totals refuses a future-on result", {
-  expect_error(sequential_totals(run_mem("on")), "double-counts")
-})
-
 
 # ---------------------------------------------------------------------------
 #  Null factors: runs grouped when a factor's counterfactual changes nothing
@@ -131,12 +112,11 @@ build_counterfactual.late_model <- function(model, params, factor_name,
           cf_type, baseline_year, ...) list(type = "zero"))
 .S3method("build_counterfactual", "late_model", build_counterfactual.late_model)
 
-run_late <- function(no_dedupe, future = "off") {
+run_late <- function(no_dedupe) {
   shapley_decompose(structure(list(no_dedupe = no_dedupe), class = "late_model"),
                     create_late_params(), factors = c("a", "b", "c"),
                     summary_vars = "burden", decomp_years = 2000:2015,
-                    cf_type = CF_TOTAL_IMPACT, future_policies = future,
-                    verbose = FALSE)
+                    cf_type = CF_TOTAL_IMPACT, verbose = FALSE)
 }
 
 test_that("null factors are detected, simulated once, and get zero effect", {
@@ -149,18 +129,12 @@ test_that("null factors are detected, simulated once, and get zero effect", {
 })
 
 test_that("grouping null factors gives the same answer as simulating every run", {
-  for (future in c("off", "on")) {
-    grouped <- run_late(no_dedupe = FALSE, future = future)
-    full    <- run_late(no_dedupe = TRUE,  future = future)
-    # Under "on" a factor that starts later is not null: switching it off
-    # also removes its future values. Only "off" groups runs here.
-    if (future == "off") {
-      expect_true(sum(full$run_summary$simulated) > sum(grouped$run_summary$simulated))
-    }
-    expect_equal(grouped$decomp, full$decomp)
-    expect_equal(grouped$extended_decomp, full$extended_decomp)
-    expect_equal(grouped$step_scenarios, full$step_scenarios)
-  }
+  grouped <- run_late(no_dedupe = FALSE)
+  full    <- run_late(no_dedupe = TRUE)
+  expect_true(sum(full$run_summary$simulated) > sum(grouped$run_summary$simulated))
+  expect_equal(grouped$decomp, full$decomp)
+  expect_equal(grouped$extended_decomp, full$extended_decomp)
+  expect_equal(grouped$step_scenarios, full$step_scenarios)
 })
 
 test_that("a factor that is null on the base but not in a coalition is simulated", {

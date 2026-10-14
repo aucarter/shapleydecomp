@@ -229,11 +229,11 @@ already running in 2000. Only their scale-up after 2000 is attributed.
 - **Speed.** Implement `supports_warm_start()`, `get_warm_start_state()` and
   `run_from_warm_start()`, and each counterfactual restarts from the observed
   state the year before the decomposition year instead of from the start of
-  the simulation. On Unix, `n_cores` runs the counterfactuals for a year in
-  parallel.
+  the simulation. On Unix, `n_cores` runs all the counterfactual
+  simulations, across every decomposition year, in parallel.
 - **One-time setup.** `prepare_decomp()` runs once before the loop. Use it to
   convert inputs (for example counts to coverage) or to cache the observed
   simulation.
 - **The method.** `vignette("methods")` covers the Shapley weights, the
-  equivalence with Das Gupta's standardization, and how the sequential
-  decomposition (`future_policies`) is built.
+  equivalence with Das Gupta's standardization, how the sequential
+  decomposition is built, and which runs are skipped.
