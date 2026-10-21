@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">shapleydecomp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -196,6 +196,24 @@ due to this factor?</td>
 for your model’s parameters. For example, “zero” for a coverage factor
 might mean no coverage, while for a rate it might mean a reference
 rate.</p>
+<div class="section level3">
+<h3 id="counterfactuals-in-between-on-and-off">Counterfactuals in between on and off<a class="anchor" aria-label="anchor" href="#counterfactuals-in-between-on-and-off"></a>
+</h3>
+<p>Every factor is either observed or counterfactual, but the
+counterfactual does not have to be zero. To ask what coverage
+<em>above</em> some reference achieved, such as half of observed
+coverage or a target level, define that reference as the counterfactual
+in your model’s <code><a href="../reference/get_baseline_value.html">get_baseline_value()</a></code> and
+<code><a href="../reference/build_counterfactual.html">build_counterfactual()</a></code>. The decomposition is unchanged and
+still needs <span class="math inline">2^n</span> runs per step. It
+attributes the difference between the observed world and the reference
+world.</p>
+<p>Two related questions are different methods, not settings of this
+one. Splitting credit along a continuous path from off to observed is
+the Aumann-Shapley value, which differs from the Shapley value only when
+factors interact non-linearly. Asking what would happen at 50% coverage
+is a scenario projection, not an attribution.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="decomposing-over-time-sequential-shapley">Decomposing over time: sequential Shapley<a class="anchor" aria-label="anchor" href="#decomposing-over-time-sequential-shapley"></a>
@@ -204,8 +222,7 @@ rate.</p>
 the susceptible pool in 2010. A single decomposition at a late year
 would credit every past policy at once, so
 <code><a href="../reference/shapley_decompose.html">shapley_decompose()</a></code> works year by year.</p>
-<p>At each decomposition year <span class="math inline">y</span>, with
-the default <code>future_policies = "off"</code>:</p>
+<p>At each decomposition year <span class="math inline">y</span>:</p>
 <ul>
 <li>every policy <strong>before</strong> <span class="math inline">y</span> is at its observed value;</li>
 <li>every policy <strong>after</strong> <span class="math inline">y</span> is at its counterfactual;</li>
@@ -226,12 +243,26 @@ y</span>, written <span class="math inline">\phi_i^{(y)}(T)</span>.
 from the first decomposition year</em> at every <span class="math inline">T</span>, so the totals stay exact. That only holds
 when <code>decomp_years</code> is contiguous, and
 <code><a href="../reference/sequential_totals.html">sequential_totals()</a></code> checks it.</p>
-<p><code>future_policies = "on"</code> reproduces runs made before
-version 0.2.0. A factor that is “on” stays at its observed values after
-<span class="math inline">y</span> as well. Its same-year attributions
-match <code>"off"</code> for any causal model, but its
-<code>extended_decomp</code> rows include future policies, so they must
-not be summed across steps.</p>
+<div class="section level3">
+<h3 id="runs-that-are-not-simulated">Runs that are not simulated<a class="anchor" aria-label="anchor" href="#runs-that-are-not-simulated"></a>
+</h3>
+<p>Exact Shapley values need all <span class="math inline">2^n</span>
+coalitions at every step, but two kinds of coalition repeat a run that
+already exists:</p>
+<ul>
+<li>the coalition with every factor off at step <span class="math inline">y</span> (counterfactual from <span class="math inline">y</span>) is the same scenario as the coalition with
+every factor on at step <span class="math inline">y-1</span>;</li>
+<li>a factor whose counterfactual leaves the step’s parameters
+unchanged, such as a programme that has not started yet, is a <em>null
+player</em>. Switching it on or off gives the same run, so its Shapley
+value at that step is 0.</li>
+</ul>
+<p><code><a href="../reference/shapley_decompose.html">shapley_decompose()</a></code> simulates each distinct scenario
+once. It confirms that the parameters are identical before reusing a
+run, so a reused run always equals the one it replaces.
+<code>run_summary</code> in the result reports, for each step, how many
+runs were simulated and which factors were null.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>

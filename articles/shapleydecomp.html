@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">shapleydecomp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -358,7 +358,8 @@ is attributed.</p>
 and <code><a href="../reference/warm_start.html">run_from_warm_start()</a></code>, and each counterfactual restarts
 from the observed state the year before the decomposition year instead
 of from the start of the simulation. On Unix, <code>n_cores</code> runs
-the counterfactuals for a year in parallel.</li>
+all the counterfactual simulations, across every decomposition year, in
+parallel.</li>
 <li>
 <strong>One-time setup.</strong> <code><a href="../reference/prepare_decomp.html">prepare_decomp()</a></code> runs
 once before the loop. Use it to convert inputs (for example counts to
@@ -366,8 +367,8 @@ coverage) or to cache the observed simulation.</li>
 <li>
 <strong>The method.</strong> <code><a href="../articles/methods.html">vignette("methods")</a></code> covers
 the Shapley weights, the equivalence with Das Gupta’s standardization,
-and how the sequential decomposition (<code>future_policies</code>) is
-built.</li>
+how the sequential decomposition is built, and which runs are
+skipped.</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

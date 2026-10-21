@@ -281,8 +281,8 @@ attributed.
   [`run_from_warm_start()`](https://aucarter.github.io/shapleydecomp/reference/warm_start.md),
   and each counterfactual restarts from the observed state the year
   before the decomposition year instead of from the start of the
-  simulation. On Unix, `n_cores` runs the counterfactuals for a year in
-  parallel.
+  simulation. On Unix, `n_cores` runs all the counterfactual
+  simulations, across every decomposition year, in parallel.
 - **One-time setup.**
   [`prepare_decomp()`](https://aucarter.github.io/shapleydecomp/reference/prepare_decomp.md)
   runs once before the loop. Use it to convert inputs (for example
@@ -290,5 +290,5 @@ attributed.
 - **The method.**
   [`vignette("methods")`](https://aucarter.github.io/shapleydecomp/articles/methods.md)
   covers the Shapley weights, the equivalence with Das Gupta’s
-  standardization, and how the sequential decomposition
-  (`future_policies`) is built.
+  standardization, how the sequential decomposition is built, and which
+  runs are skipped.

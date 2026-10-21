@@ -11,7 +11,7 @@ whether that factor is "on" or "off" for that run.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">shapleydecomp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@ whether that factor is "on" or "off" for that run.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_run_table</span><span class="op">(</span><span class="va">factors</span>, decomp_scalar <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_run_table</span><span class="op">(</span><span class="va">factors</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,16 +66,11 @@ whether that factor is "on" or "off" for that run.</p>
 <dl><dt id="arg-factors">factors<a class="anchor" aria-label="anchor" href="#arg-factors"></a></dt>
 <dd><p>Character vector of factor names.</p></dd>
 
-
-<dt id="arg-decomp-scalar">decomp_scalar<a class="anchor" aria-label="anchor" href="#arg-decomp-scalar"></a></dt>
-<dd><p>Numeric, the lower bound of the factor scale.
-Default is 0 (binary: 0 = off, 1 = on).</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>data.table</code> with columns: <code>run_id</code> (integer), and one
-column per factor with values in <code>decomp_scalar:1</code>.</p>
+    <p>A <code>data.table</code> with 2^n rows: <code>run_id</code> (integer), and one
+column per factor with values 0 or 1.</p>
     </div>
 
     <div class="section level2">

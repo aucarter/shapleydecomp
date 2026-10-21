@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">shapleydecomp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,6 @@
 <div class="section level3">
 <h3 id="id_12-deploy-the-site-so-its-urls-resolve-done">1.2 Deploy the site so its URLs resolve: done<a class="anchor" aria-label="anchor" href="#id_12-deploy-the-site-so-its-urls-resolve-done"></a></h3>
 <p>Live at <a href="https://aucarter.github.io/shapleydecomp/" class="uri">https://aucarter.github.io/shapleydecomp/</a> since 2026-10-13. The R-CMD-check workflow passed on all five platforms (macOS, Windows, and Ubuntu on devel / release / oldrel-1) at <code>ddd2957</code>.</p>
-<p><code>DESCRIPTION</code>, the README and the package help page link to <code>https://aucarter.github.io/decomposeR/</code>. CRAN checks every URL, and these return 404 until the <code>pkgdown</code> workflow has run once. After the first run, enable Pages in the repo settings with source branch <code>gh-pages</code>, folder <code>/</code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -95,7 +94,7 @@
 <div class="section level2">
 <h2 id="id_3-should-fix-before-submitting">3. Should fix before submitting<a class="anchor" aria-label="anchor" href="#id_3-should-fix-before-submitting"></a></h2>
 <p>Done (2026-10-13): - <code>ihme_loc_id</code> grouping replaced by a <code>group_vars</code> argument (<code><a href="reference/shapley_decompose.html">shapley_decompose()</a></code>, <code><a href="reference/run_decomp.html">run_decomp()</a></code>, <code><a href="reference/sequential_totals.html">sequential_totals()</a></code>). - The internal <code>hiv_decomp</code> reference removed from the <code>future_policies</code> docs. - <code>DESCRIPTION</code> rewritten, with references in CRAN form: Shapley (1953) <a href="doi:10.1515/9781400881970-018" class="uri">doi:10.1515/9781400881970-018</a> (DOI verified against Crossref) and Das Gupta (1993) <census bureau p23-186 pdf> (URL verified). - The stale run-table comment fixed. - Spelling pass, with domain terms in <code>inst/WORDLIST</code>. URL check: all URLs correct. - Found along the way: the warm-start docs described a contract the code doesn’t follow. They now document what <code><a href="reference/shapley_decompose.html">shapley_decompose()</a></code> actually passes, with a runnable example. <code>n_cores &gt; 1</code> on Windows now falls back instead of erroring.</census></p>
-<p>Still open (tracked as GitHub issues): - Confirm the maintainer email, then run the external checks and submit (tracking issue). - Give the full citation for the sequential-Shapley reference in the <code>future_policies</code> docs. - <code>decomp_scalar</code> values other than 0 give wrong results. - Rename <code>\pkg{decomposer}</code> in the manuscript, and add <code>inst/CITATION</code> once it has a DOI.</p>
+<p>Still open (tracked as GitHub issues): - Run the external checks and submit (tracking issue). The maintainer email, <code>aucarter@uw.edu</code>, is confirmed (2026-10-21). - Give the full citation for the sequential-Shapley reference in the <code><a href="reference/shapley_decompose.html">shapley_decompose()</a></code> details. The Methods vignette cites a different title; the two should agree. - Rename <code>\pkg{decomposer}</code> in the manuscript, and add <code>inst/CITATION</code> once it has a DOI.</p>
 </div>
 <div class="section level2">
 <h2 id="id_4-submission-steps">4. Submission steps<a class="anchor" aria-label="anchor" href="#id_4-submission-steps"></a></h2>

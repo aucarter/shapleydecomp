@@ -17,13 +17,11 @@ shapley_decompose(
   method = "shapley",
   cf_type = CF_CHANGE_SINCE,
   baseline_year = min(decomp_years),
-  decomp_scalar = 0,
   extended = TRUE,
   step_scenarios = TRUE,
   verbose = TRUE,
   n_cores = 1L,
   group_vars = character(),
-  future_policies = c("off", "on"),
   ...
 )
 ```
@@ -75,11 +73,6 @@ shapley_decompose(
   Integer, the reference year for `"change_since"` counterfactuals.
   Defaults to `min(decomp_years)`.
 
-- decomp_scalar:
-
-  Numeric, lower bound for the factor levels in the run table. Default 0
-  (binary on/off).
-
 - extended:
 
   Logical, whether to compute the extended factor decomposition (effects
@@ -110,25 +103,6 @@ shapley_decompose(
   [`summarize_results()`](https://aucarter.github.io/shapleydecomp/reference/summarize_results.md)
   that identify independent groups, such as locations or draws, each
   decomposed separately. Default none.
-
-- future_policies:
-
-  Character, what every factor does AFTER the decomp year in each
-  coalition run. `"off"` is sequential Shapley as specified (Carter,
-  "Estimating the impact of public health policies ... with Shapley
-  value decomposition", Algorithm 1): at step y all policies before y
-  are at their observed values, all policies after y are at their
-  counterfactual, and only the year-y policy varies across coalitions.
-  The attribution at step y is then the marginal impact of the year-y
-  policy conditional on the past and undiluted by the future, and
-  [`sequential_totals()`](https://aucarter.github.io/shapleydecomp/reference/sequential_totals.md)
-  sums the steps into each factor's total impact at every year. This is
-  the default. `"on"` (the behaviour before version 0.2.0, kept for
-  reproducing old runs) leaves a factor that is "on" in a coalition at
-  its observed values for ALL years, including after y; its same-year
-  attribution equals `"off"`'s for any causal model, but its
-  `extended_decomp` rows (year \> decomp year) include future policies
-  and must not be summed across steps.
 
 - ...:
 
@@ -167,6 +141,19 @@ A list with components:
 - params:
 
   List of decomposition parameters used.
+
+## Details
+
+The decomposition is sequential (Carter, "Estimating the impact of
+public health policies ... with Shapley value decomposition", Algorithm
+1). At each decomp year y, every policy before y is at its observed
+value, every policy after y is at its counterfactual, and only the
+year-y policy varies across the 2^n coalitions. The attribution at step
+y is therefore the marginal impact of the year-y policy, conditional on
+the past and undiluted by the future. `extended_decomp` records that
+impact at every later year, and
+[`sequential_totals()`](https://aucarter.github.io/shapleydecomp/reference/sequential_totals.md)
+sums the steps into each factor's total impact at every year.
 
 ## See also
 

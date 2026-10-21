@@ -94,6 +94,25 @@ methods implement these definitions for your model’s parameters. For
 example, “zero” for a coverage factor might mean no coverage, while for
 a rate it might mean a reference rate.
 
+### Counterfactuals in between on and off
+
+Every factor is either observed or counterfactual, but the
+counterfactual does not have to be zero. To ask what coverage *above*
+some reference achieved, such as half of observed coverage or a target
+level, define that reference as the counterfactual in your model’s
+[`get_baseline_value()`](https://aucarter.github.io/shapleydecomp/reference/get_baseline_value.md)
+and
+[`build_counterfactual()`](https://aucarter.github.io/shapleydecomp/reference/build_counterfactual.md).
+The decomposition is unchanged and still needs 2^n runs per step. It
+attributes the difference between the observed world and the reference
+world.
+
+Two related questions are different methods, not settings of this one.
+Splitting credit along a continuous path from off to observed is the
+Aumann-Shapley value, which differs from the Shapley value only when
+factors interact non-linearly. Asking what would happen at 50% coverage
+is a scenario projection, not an attribution.
+
 ## Decomposing over time: sequential Shapley
 
 Simulations carry state forward. Infections averted in 2005 change the
@@ -102,8 +121,7 @@ credit every past policy at once, so
 [`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md)
 works year by year.
 
-At each decomposition year y, with the default
-`future_policies = "off"`:
+At each decomposition year y:
 
 - every policy **before** y is at its observed value;
 - every policy **after** y is at its counterfactual;
@@ -124,11 +142,24 @@ only holds when `decomp_years` is contiguous, and
 [`sequential_totals()`](https://aucarter.github.io/shapleydecomp/reference/sequential_totals.md)
 checks it.
 
-`future_policies = "on"` reproduces runs made before version 0.2.0. A
-factor that is “on” stays at its observed values after y as well. Its
-same-year attributions match `"off"` for any causal model, but its
-`extended_decomp` rows include future policies, so they must not be
-summed across steps.
+### Runs that are not simulated
+
+Exact Shapley values need all 2^n coalitions at every step, but two
+kinds of coalition repeat a run that already exists:
+
+- the coalition with every factor off at step y (counterfactual from y)
+  is the same scenario as the coalition with every factor on at step
+  y-1;
+- a factor whose counterfactual leaves the step’s parameters unchanged,
+  such as a programme that has not started yet, is a *null player*.
+  Switching it on or off gives the same run, so its Shapley value at
+  that step is 0.
+
+[`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md)
+simulates each distinct scenario once. It confirms that the parameters
+are identical before reusing a run, so a reused run always equals the
+one it replaces. `run_summary` in the result reports, for each step, how
+many runs were simulated and which factors were null.
 
 ## Reference
 

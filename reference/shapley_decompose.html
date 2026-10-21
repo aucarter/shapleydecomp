@@ -11,7 +11,7 @@ of the specified factors across all decomposition years."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">shapleydecomp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,13 +65,11 @@ of the specified factors across all decomposition years.</p>
 <span>  method <span class="op">=</span> <span class="st">"shapley"</span>,</span>
 <span>  cf_type <span class="op">=</span> <span class="va">CF_CHANGE_SINCE</span>,</span>
 <span>  baseline_year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">decomp_years</span><span class="op">)</span>,</span>
-<span>  decomp_scalar <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  extended <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  step_scenarios <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  group_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  future_policies <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"off"</span>, <span class="st">"on"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -124,11 +122,6 @@ intervention.</p></dd>
 counterfactuals. Defaults to <code>min(decomp_years)</code>.</p></dd>
 
 
-<dt id="arg-decomp-scalar">decomp_scalar<a class="anchor" aria-label="anchor" href="#arg-decomp-scalar"></a></dt>
-<dd><p>Numeric, lower bound for the factor levels in the
-run table. Default 0 (binary on/off).</p></dd>
-
-
 <dt id="arg-extended">extended<a class="anchor" aria-label="anchor" href="#arg-extended"></a></dt>
 <dd><p>Logical, whether to compute the extended factor
 decomposition (effects at all output years &gt;= decomp year). Default TRUE.</p></dd>
@@ -156,24 +149,6 @@ it falls back to sequential with a warning.</p></dd>
 <dd><p>Character vector of columns in the output of
 <code><a href="summarize_results.html">summarize_results()</a></code> that identify independent groups, such as
 locations or draws, each decomposed separately. Default none.</p></dd>
-
-
-<dt id="arg-future-policies">future_policies<a class="anchor" aria-label="anchor" href="#arg-future-policies"></a></dt>
-<dd><p>Character, what every factor does AFTER the decomp
-year in each coalition run. <code>"off"</code> is sequential Shapley as specified
-(Carter, "Estimating the impact of public health policies ... with Shapley
-value decomposition", Algorithm 1): at step y all policies before y are at
-their observed values, all policies after y are at their counterfactual,
-and only the year-y policy varies across coalitions. The attribution at
-step y is then the marginal impact of the year-y policy conditional on the
-past and undiluted by the future, and <code><a href="sequential_totals.html">sequential_totals()</a></code> sums the
-steps into each factor's total impact at every year. This is the
-default. <code>"on"</code> (the behaviour before version 0.2.0, kept for
-reproducing old runs) leaves a factor that is "on" in a coalition at its
-observed values for ALL years, including after y; its same-year
-attribution equals <code>"off"</code>'s for any causal model, but its
-<code>extended_decomp</code> rows (year &gt; decomp year) include future policies
-and must not be summed across steps.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -209,6 +184,18 @@ counterfactual left the params unchanged, so their effect is 0).</p></dd>
 
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The decomposition is sequential (Carter, "Estimating the impact of public
+health policies ... with Shapley value decomposition", Algorithm 1). At
+each decomp year y, every policy before y is at its observed value, every
+policy after y is at its counterfactual, and only the year-y policy varies
+across the 2^n coalitions. The attribution at step y is therefore the
+marginal impact of the year-y policy, conditional on the past and undiluted
+by the future. <code>extended_decomp</code> records that impact at every later
+year, and <code><a href="sequential_totals.html">sequential_totals()</a></code> sums the steps into each factor's
+total impact at every year.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="../articles/shapleydecomp.html">vignette("shapleydecomp")</a></code> for a worked example, and
