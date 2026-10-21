@@ -36,11 +36,6 @@ Live at https://aucarter.github.io/shapleydecomp/ since 2026-10-13. The
 R-CMD-check workflow passed on all five platforms (macOS, Windows, and
 Ubuntu on devel / release / oldrel-1) at `ddd2957`.
 
-`DESCRIPTION`, the README and the package help page link to
-`https://aucarter.github.io/decomposeR/`. CRAN checks every URL, and these
-return 404 until the `pkgdown` workflow has run once. After the first run,
-enable Pages in the repo settings with source branch `gh-pages`, folder `/`.
-
 ## 2. Done on the `pkgdown-site` branch
 
 - Roxygen generates `man/` and `NAMESPACE`. All 17 exports are documented,
@@ -83,11 +78,11 @@ Done (2026-10-13):
   instead of erroring.
 
 Still open (tracked as GitHub issues):
-- Confirm the maintainer email, then run the external checks and submit
-  (tracking issue).
+- Run the external checks and submit (tracking issue). The maintainer
+  email, `aucarter@uw.edu`, is confirmed (2026-10-21).
 - Give the full citation for the sequential-Shapley reference in the
-  `future_policies` docs.
-- `decomp_scalar` values other than 0 give wrong results.
+  `shapley_decompose()` details. The Methods vignette cites a different
+  title; the two should agree.
 - Rename `\pkg{decomposer}` in the manuscript, and add `inst/CITATION` once
   it has a DOI.
 

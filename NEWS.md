@@ -1,4 +1,6 @@
-# shapleydecomp 0.3.0
+# shapleydecomp 1.0.0
+
+* First CRAN release.
 
 * The package is renamed from `decomposer` to `shapleydecomp`. CRAN already
   hosts `DecomposeR`, and CRAN package names are case-insensitive. Replace

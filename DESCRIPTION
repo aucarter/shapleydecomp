@@ -1,6 +1,6 @@
 Package: shapleydecomp
 Title: Shapley Value Decomposition for Discrete-Time Simulation Models
-Version: 0.3.0
+Version: 1.0.0
 Authors@R: 
     person("Austin", "Carter", , "aucarter@uw.edu", role = c("aut", "cre"))
 Description: Attributes changes in the outcomes of a discrete-time simulation
