@@ -78,8 +78,9 @@ Done (2026-10-13):
   instead of erroring.
 
 Still open (tracked as GitHub issues):
-- Run the external checks and submit (tracking issue). The maintainer
-  email, `aucarter@uw.edu`, is confirmed (2026-10-21).
+- Submitted 1.0.0 on 2026-10-21 (`9bcc341`, recorded in `CRAN-SUBMISSION`),
+  after win-builder R-devel (1 NOTE: new submission, author-name spellings)
+  and GitHub Actions on all five platforms. Awaiting CRAN review.
 - Rename `\pkg{decomposer}` in the manuscript, and add `inst/CITATION` once
   it has a DOI.
 
