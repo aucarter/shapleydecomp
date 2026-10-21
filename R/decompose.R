@@ -4,15 +4,15 @@
 # Main entry point: orchestrates the full decomposition pipeline.
 #
 # The shapley_decompose() function:
-#   1. Prepares the model (one-time setup)
-#   2. Computes baseline values for each factor
-#   3. Generates the factorial run table
-#   4. Loops over decomposition years:
-#      a. Runs all counterfactual combinations (with optional warm starts)
-#      b. Collects summaries into a data.table
-#      c. Runs the decomposition algebra
-#      d. Accumulates step scenarios and extended decomposition
-#   5. Returns all outputs in a structured list
+#   1. Generates the factorial run table
+#   2. Prepares the model (one-time setup)
+#   3. Computes baseline values for each factor
+#   4. Plans every coalition run across all decomp years, skipping runs that
+#      repeat an existing scenario, and simulates the rest in one map
+#      (parallel when n_cores > 1, with optional warm starts)
+#   5. Decomposes each year: decomposition algebra, step scenarios and
+#      extended decomposition
+#   6. Returns all outputs in a structured list
 # ============================================================================
 
 #' Run a full decomposition analysis

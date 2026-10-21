@@ -36,7 +36,8 @@ make_run_table(c("a", "b", "c"))
 
 ## Shapley values
 
-Treat the set $S$ of factors held at their observed values as a coalition,
+Following Shapley (1953), treat the set $S$ of factors held at their
+observed values as a coalition,
 with value $v(S) = f_t(x_S^1, x_{N \setminus S}^0)$. The Shapley value of
 factor $i$ is its marginal effect averaged over every coalition of the
 other factors:
@@ -63,7 +64,7 @@ decomp_algebra(rt, list(summary_vars = "y", decomp_vars = c("a", "b"),
 
 ### Das Gupta's standardization is the same thing
 
-Das Gupta's symmetric standardization, the classical demographic tool,
+Das Gupta's (1993) symmetric standardization, the classical demographic tool,
 weights each marginal effect by $1 / \bigl[n \binom{n-1}{k}\bigr]$, where
 $k = |S|$. Expanding the binomial gives
 
@@ -150,6 +151,14 @@ always equals the one it replaces. `run_summary` in the result reports, for
 each step, how many runs were simulated and which factors were null.
 
 ## References
+
+Shapley LS (1953). A value for n-person games. In Kuhn HW, Tucker AW (eds),
+*Contributions to the Theory of Games II*, 307--317. Princeton University
+Press. <https://doi.org/10.1515/9781400881970-018>
+
+Das Gupta P (1993). *Standardization and Decomposition of Rates: A User's
+Manual.* Current Population Reports P23-186. U.S. Bureau of the Census.
+<https://www2.census.gov/library/publications/1993/demographics/p23-186.pdf>
 
 Carter A (2025). *Quantifying averted burden from infectious disease control
 policies.* PhD dissertation, University of Washington.

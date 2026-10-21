@@ -29,6 +29,9 @@
 #'     model's notion of "no intervention"). This measures the \emph{total}
 #'     impact of the factor, not just changes since a reference point.
 #' }
+#' @return A length-one character string: \code{"change_since"} or
+#'   \code{"total_impact"}, the values accepted by the \code{cf_type}
+#'   argument of \code{\link{shapley_decompose}}.
 #' @name cf_types
 #' @examples
 #' CF_CHANGE_SINCE

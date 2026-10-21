@@ -16,6 +16,11 @@ CF_CHANGE_SINCE
 
 CF_TOTAL_IMPACT
 }
+\value{
+A length-one character string: \code{"change_since"} or
+\code{"total_impact"}, the values accepted by the \code{cf_type}
+argument of \code{\link{shapley_decompose}}.
+}
 \description{
 Two types of counterfactual analysis are supported:
 \itemize{

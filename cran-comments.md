@@ -3,13 +3,15 @@
 0 errors | 0 warnings | 1 note
 
 * This is a new release.
+* Possibly misspelled words in DESCRIPTION: "Shapley" and "Das" (Gupta)
+  are the surnames of the authors cited, and "Counterfactuals" is the
+  standard technical term.
 
 ## Test environments
 
 * local: Ubuntu, R 4.4.2
 * GitHub Actions: macOS (release), Windows (release), Ubuntu (devel, release, oldrel-1)
 * win-builder: R-devel
-* mac builder: R-release
 
 ## Reverse dependencies
 
