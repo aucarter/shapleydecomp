@@ -110,7 +110,8 @@ scenario projection, not an attribution.
 
 Simulations carry state forward. Infections averted in 2005 change the
 susceptible pool in 2010. A single decomposition at a late year would credit
-every past policy at once, so `shapley_decompose()` works year by year.
+every past policy at once, so `shapley_decompose()` works year by year, using
+the sequential Shapley construction of Carter (2025).
 
 At each decomposition year $y$:
 
@@ -148,7 +149,11 @@ that the parameters are identical before reusing a run, so a reused run
 always equals the one it replaces. `run_summary` in the result reports, for
 each step, how many runs were simulated and which factors were null.
 
-## Reference
+## References
+
+Carter A (2025). *Quantifying averted burden from infectious disease control
+policies.* PhD dissertation, University of Washington.
+<https://hdl.handle.net/1773/53310>
 
 Carter A. *A model-agnostic framework for factorial
 decomposition of discrete-time simulation outcomes, with a proof of

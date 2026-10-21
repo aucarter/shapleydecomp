@@ -95,8 +95,9 @@ the shapleydecomp S3 interface, it performs a complete factorial decomposition
 of the specified factors across all decomposition years.
 }
 \details{
-The decomposition is sequential (Carter, "Estimating the impact of public
-health policies ... with Shapley value decomposition", Algorithm 1). At
+The decomposition is sequential (Carter 2025, \emph{Quantifying averted
+burden from infectious disease control policies}, PhD dissertation,
+University of Washington, \url{https://hdl.handle.net/1773/53310}). At
 each decomp year y, every policy before y is at its observed value, every
 policy after y is at its counterfactual, and only the year-y policy varies
 across the 2^n coalitions. The attribution at step y is therefore the
