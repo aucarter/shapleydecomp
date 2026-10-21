@@ -24,6 +24,12 @@ An object of class `character` of length 1.
 
 An object of class `character` of length 1.
 
+## Value
+
+A length-one character string: `"change_since"` or `"total_impact"`, the
+values accepted by the `cf_type` argument of
+[`shapley_decompose`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md).
+
 ## Examples
 
 ``` r

@@ -36,10 +36,10 @@ make_run_table(c("a", "b", "c"))
 
 ## Shapley values
 
-Treat the set S of factors held at their observed values as a coalition,
-with value v(S) = f_t(x_S^1, x\_{N \setminus S}^0). The Shapley value of
-factor i is its marginal effect averaged over every coalition of the
-other factors:
+Following Shapley (1953), treat the set S of factors held at their
+observed values as a coalition, with value v(S) = f_t(x_S^1, x\_{N
+\setminus S}^0). The Shapley value of factor i is its marginal effect
+averaged over every coalition of the other factors:
 
 \phi_i = \sum\_{S \subseteq N \setminus \\i\\} \frac{\|S\|!\\(n -
 \|S\| - 1)!}{n!}\\\bigl\[v(S \cup \\i\\) - v(S)\bigr\].
@@ -65,9 +65,9 @@ decomp_algebra(rt, list(summary_vars = "y", decomp_vars = c("a", "b"),
 
 ### Das Gupta’s standardization is the same thing
 
-Das Gupta’s symmetric standardization, the classical demographic tool,
-weights each marginal effect by 1 / \bigl\[n \binom{n-1}{k}\bigr\],
-where k = \|S\|. Expanding the binomial gives
+Das Gupta’s (1993) symmetric standardization, the classical demographic
+tool, weights each marginal effect by 1 / \bigl\[n
+\binom{n-1}{k}\bigr\], where k = \|S\|. Expanding the binomial gives
 
 \frac{1}{n \binom{n-1}{k}} = \frac{k!\\(n-1-k)!}{n \cdot (n-1)!} =
 \frac{k!\\(n-k-1)!}{n!},
@@ -119,7 +119,8 @@ Simulations carry state forward. Infections averted in 2005 change the
 susceptible pool in 2010. A single decomposition at a late year would
 credit every past policy at once, so
 [`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md)
-works year by year.
+works year by year, using the sequential Shapley construction of Carter
+(2025).
 
 At each decomposition year y:
 
@@ -161,7 +162,20 @@ are identical before reusing a run, so a reused run always equals the
 one it replaces. `run_summary` in the result reports, for each step, how
 many runs were simulated and which factors were null.
 
-## Reference
+## References
+
+Shapley LS (1953). A value for n-person games. In Kuhn HW, Tucker AW
+(eds), *Contributions to the Theory of Games II*, 307–317. Princeton
+University Press. <https://doi.org/10.1515/9781400881970-018>
+
+Das Gupta P (1993). *Standardization and Decomposition of Rates: A
+User’s Manual.* Current Population Reports P23-186. U.S. Bureau of the
+Census.
+<https://www2.census.gov/library/publications/1993/demographics/p23-186.pdf>
+
+Carter A (2025). *Quantifying averted burden from infectious disease
+control policies.* PhD dissertation, University of Washington.
+<https://hdl.handle.net/1773/53310>
 
 Carter A. *A model-agnostic framework for factorial decomposition of
 discrete-time simulation outcomes, with a proof of equivalence between

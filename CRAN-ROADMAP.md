@@ -91,12 +91,8 @@ falls back instead of erroring.
 
 Still open (tracked as GitHub issues): - Run the external checks and
 submit (tracking issue). The maintainer email, `aucarter@uw.edu`, is
-confirmed (2026-10-21). - Give the full citation for the
-sequential-Shapley reference in the
-[`shapley_decompose()`](https://aucarter.github.io/shapleydecomp/reference/shapley_decompose.md)
-details. The Methods vignette cites a different title; the two should
-agree. - Rename `\pkg{decomposer}` in the manuscript, and add
-`inst/CITATION` once it has a DOI.
+confirmed (2026-10-21). - Rename `\pkg{decomposer}` in the manuscript,
+and add `inst/CITATION` once it has a DOI.
 
 ## 4. Submission steps
 

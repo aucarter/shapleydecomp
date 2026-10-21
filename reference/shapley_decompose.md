@@ -144,14 +144,15 @@ A list with components:
 
 ## Details
 
-The decomposition is sequential (Carter, "Estimating the impact of
-public health policies ... with Shapley value decomposition", Algorithm
-1). At each decomp year y, every policy before y is at its observed
-value, every policy after y is at its counterfactual, and only the
-year-y policy varies across the 2^n coalitions. The attribution at step
-y is therefore the marginal impact of the year-y policy, conditional on
-the past and undiluted by the future. `extended_decomp` records that
-impact at every later year, and
+The decomposition is sequential (Carter 2025, *Quantifying averted
+burden from infectious disease control policies*, PhD dissertation,
+University of Washington, <https://hdl.handle.net/1773/53310>). At each
+decomp year y, every policy before y is at its observed value, every
+policy after y is at its counterfactual, and only the year-y policy
+varies across the 2^n coalitions. The attribution at step y is therefore
+the marginal impact of the year-y policy, conditional on the past and
+undiluted by the future. `extended_decomp` records that impact at every
+later year, and
 [`sequential_totals()`](https://aucarter.github.io/shapleydecomp/reference/sequential_totals.md)
 sums the steps into each factor's total impact at every year.
 

@@ -115,10 +115,10 @@ exactly.</p>
 <div class="section level2">
 <h2 id="shapley-values">Shapley values<a class="anchor" aria-label="anchor" href="#shapley-values"></a>
 </h2>
-<p>Treat the set <span class="math inline">S</span> of factors held at
-their observed values as a coalition, with value <span class="math inline">v(S) = f_t(x_S^1, x_{N \setminus S}^0)</span>. The
-Shapley value of factor <span class="math inline">i</span> is its
-marginal effect averaged over every coalition of the other factors:</p>
+<p>Following Shapley (1953), treat the set <span class="math inline">S</span> of factors held at their observed values as
+a coalition, with value <span class="math inline">v(S) = f_t(x_S^1, x_{N
+\setminus S}^0)</span>. The Shapley value of factor <span class="math inline">i</span> is its marginal effect averaged over every
+coalition of the other factors:</p>
 <p><span class="math display">
 \phi_i = \sum_{S \subseteq N \setminus \{i\}}
   \frac{|S|!\,(n - |S| - 1)!}{n!}\,\bigl[v(S \cup \{i\}) - v(S)\bigr].
@@ -143,10 +143,8 @@ factor <code>b</code> gets the same treatment:</p>
 <div class="section level3">
 <h3 id="das-guptas-standardization-is-the-same-thing">Das Gupta’s standardization is the same thing<a class="anchor" aria-label="anchor" href="#das-guptas-standardization-is-the-same-thing"></a>
 </h3>
-<p>Das Gupta’s symmetric standardization, the classical demographic
-tool, weights each marginal effect by <span class="math inline">1 /
-\bigl[n \binom{n-1}{k}\bigr]</span>, where <span class="math inline">k =
-|S|</span>. Expanding the binomial gives</p>
+<p>Das Gupta’s (1993) symmetric standardization, the classical
+demographic tool, weights each marginal effect by <span class="math inline">1 / \bigl[n \binom{n-1}{k}\bigr]</span>, where <span class="math inline">k = |S|</span>. Expanding the binomial gives</p>
 <p><span class="math display">
 \frac{1}{n \binom{n-1}{k}} = \frac{k!\,(n-1-k)!}{n \cdot (n-1)!}
 = \frac{k!\,(n-k-1)!}{n!},
@@ -221,7 +219,8 @@ is a scenario projection, not an attribution.</p>
 <p>Simulations carry state forward. Infections averted in 2005 change
 the susceptible pool in 2010. A single decomposition at a late year
 would credit every past policy at once, so
-<code><a href="../reference/shapley_decompose.html">shapley_decompose()</a></code> works year by year.</p>
+<code><a href="../reference/shapley_decompose.html">shapley_decompose()</a></code> works year by year, using the
+sequential Shapley construction of Carter (2025).</p>
 <p>At each decomposition year <span class="math inline">y</span>:</p>
 <ul>
 <li>every policy <strong>before</strong> <span class="math inline">y</span> is at its observed value;</li>
@@ -265,8 +264,17 @@ runs were simulated and which factors were null.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Shapley LS (1953). A value for n-person games. In Kuhn HW, Tucker AW
+(eds), <em>Contributions to the Theory of Games II</em>, 307–317.
+Princeton University Press. <a href="https://doi.org/10.1515/9781400881970-018" class="external-link uri">https://doi.org/10.1515/9781400881970-018</a></p>
+<p>Das Gupta P (1993). <em>Standardization and Decomposition of Rates: A
+User’s Manual.</em> Current Population Reports P23-186. U.S. Bureau of
+the Census. <a href="https://www2.census.gov/library/publications/1993/demographics/p23-186.pdf" class="external-link uri">https://www2.census.gov/library/publications/1993/demographics/p23-186.pdf</a></p>
+<p>Carter A (2025). <em>Quantifying averted burden from infectious
+disease control policies.</em> PhD dissertation, University of
+Washington. <a href="https://hdl.handle.net/1773/53310" class="external-link uri">https://hdl.handle.net/1773/53310</a></p>
 <p>Carter A. <em>A model-agnostic framework for factorial decomposition
 of discrete-time simulation outcomes, with a proof of equivalence
 between Das Gupta and Shapley value decomposition.</em> Manuscript in
