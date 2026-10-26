@@ -89,10 +89,15 @@ contract the code doesn’t follow. They now document what
 actually passes, with a runnable example. `n_cores > 1` on Windows now
 falls back instead of erroring.
 
-Still open (tracked as GitHub issues): - Run the external checks and
-submit (tracking issue). The maintainer email, `aucarter@uw.edu`, is
-confirmed (2026-10-21). - Rename `\pkg{decomposer}` in the manuscript,
-and add `inst/CITATION` once it has a DOI.
+Still open (tracked as GitHub issues): - Submitted 1.0.0 on 2026-10-21
+(`9bcc341`, recorded in `CRAN-SUBMISSION`), after win-builder R-devel (1
+NOTE: new submission, author-name spellings) and GitHub Actions on all
+five platforms. Passed the CRAN pre-test on 2026-10-22 (Windows and
+Debian, 1 NOTE each: new submission, author-name spellings); awaiting
+manual review, due within 10 working days. - Callers to migrate when
+they next update: leapfrog_adulthiv#5, hiv_decomp#3. Both pass arguments
+1.0.0 removed, so it is not a rename. - Rename `\pkg{decomposer}` in the
+manuscript, and add `inst/CITATION` once it has a DOI.
 
 ## 4. Submission steps
 

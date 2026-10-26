@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   methods: methods.html
   shapleydecomp: shapleydecomp.html
-last_built: 2026-10-21T23:30Z
+last_built: 2026-10-26T23:33Z
 urls:
   reference: https://aucarter.github.io/shapleydecomp/reference
   article: https://aucarter.github.io/shapleydecomp/articles
