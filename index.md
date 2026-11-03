@@ -4,6 +4,15 @@ A model-agnostic decomposition framework for discrete-time simulations.
 
 ## Installation
 
+Install the released version from CRAN:
+
+``` r
+
+install.packages("shapleydecomp")
+```
+
+or the development version from GitHub:
+
 ``` r
 
 # install.packages("remotes")
