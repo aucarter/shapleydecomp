@@ -1,6 +1,7 @@
 # shapleydecomp
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/shapleydecomp)](https://CRAN.R-project.org/package=shapleydecomp)
 [![R-CMD-check](https://github.com/aucarter/shapleydecomp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aucarter/shapleydecomp/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/aucarter/shapleydecomp/actions/workflows/pkgdown.yaml/badge.svg)](https://aucarter.github.io/shapleydecomp/)
 <!-- badges: end -->
@@ -8,6 +9,14 @@
 A model-agnostic decomposition framework for discrete-time simulations.
 
 ## Installation
+
+Install the released version from CRAN:
+
+```r
+install.packages("shapleydecomp")
+```
+
+or the development version from GitHub:
 
 ```r
 # install.packages("remotes")
